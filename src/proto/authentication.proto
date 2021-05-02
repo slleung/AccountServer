@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+option java_package = "com.vmiforall.authentication";
+option java_outer_classname = "AuthenticationProto";
+
+package authentication;
+
+import "google/protobuf/empty.proto";
+import "google/rpc/status.proto";
+
+service AuthenticationService {
+
+  rpc CreateUser(CreateUserRequest) returns (CreateUserResponse) {}
+
+}
+
+message CreateUserRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message CreateUserResponse {
+  google.rpc.Status status = 1;
+  string jwtToken = 2;
+}

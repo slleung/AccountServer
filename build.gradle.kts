@@ -1,0 +1,95 @@
+import com.google.protobuf.gradle.*
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
+group = "com.vmiforall"
+version = "1.0-SNAPSHOT"
+
+plugins {
+    kotlin("jvm") version "1.4.32"
+    id("com.google.protobuf") version "0.8.16"
+    id("java")
+}
+
+buildscript {
+    repositories {
+        google()
+        jcenter()
+        mavenCentral()
+    }
+    dependencies {
+        classpath("com.google.protobuf:protobuf-gradle-plugin:0.8.16")
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        jcenter()
+        mavenCentral()
+    }
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir("build/generated/source/proto/main/java")
+            srcDir("build/generated/source/proto/main/grpckt")
+            srcDir("build/extracted-include-protos/main")
+        }
+        proto {
+            // In addition to the default 'src/main/proto'
+            srcDir("src/proto")
+        }
+    }
+}
+
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:3.12.0"
+    }
+    plugins {
+        id("grpc") {
+            artifact = "io.grpc:protoc-gen-grpc-java:1.36.0"
+        }
+        id("grpckt") {
+            artifact = "io.grpc:protoc-gen-grpc-kotlin:1.0.0:jdk7@jar"
+        }
+    }
+    generateProtoTasks {
+        ofSourceSet("main").forEach {
+            it.plugins {
+                id("grpc")
+                id("grpckt")
+            }
+        }
+    }
+}
+
+dependencies {
+    val grpcVersion by extra { "1.36.1" }
+    implementation("io.grpc:grpc-netty-shaded:$grpcVersion")
+    implementation("io.grpc:grpc-protobuf:$grpcVersion")
+    implementation("io.grpc:grpc-kotlin-stub:1.0.0")
+    implementation("com.google.guava:guava:30.1.1-jre")
+    compileOnly("org.apache.tomcat:annotations-api:6.0.53") // necessary for Java 9+
+
+    val jjwtVersion by extra { "0.11.2" }
+    implementation("io.jsonwebtoken:jjwt-api:$jjwtVersion")
+    runtimeOnly("io.jsonwebtoken:jjwt-impl:$jjwtVersion")
+    runtimeOnly("io.jsonwebtoken:jjwt-jackson:$jjwtVersion")  // or 'io.jsonwebtoken:jjwt-gson:0.11.2' for gson
+    // Uncomment the next line if you want to use RSASSA-PSS (PS256, PS384, PS512) algorithms:
+    //'org.bouncycastle:bcprov-jdk15on:1.60',
+
+    val koinVersion by extra { "3.0.1" }
+    implementation("io.insert-koin:koin-core:$koinVersion")
+
+    testImplementation(kotlin("test-junit"))
+}
+
+tasks.test {
+    useJUnit()
+}
+
+tasks.withType<KotlinCompile> {
+    kotlinOptions.jvmTarget = "1.8"
+}
