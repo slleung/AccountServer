@@ -76,9 +76,10 @@ dependencies {
     val jjwtVersion by extra { "0.11.2" }
     implementation("io.jsonwebtoken:jjwt-api:$jjwtVersion")
     runtimeOnly("io.jsonwebtoken:jjwt-impl:$jjwtVersion")
-    runtimeOnly("io.jsonwebtoken:jjwt-jackson:$jjwtVersion")  // or 'io.jsonwebtoken:jjwt-gson:0.11.2' for gson
-    // Uncomment the next line if you want to use RSASSA-PSS (PS256, PS384, PS512) algorithms:
-    //'org.bouncycastle:bcprov-jdk15on:1.60',
+    runtimeOnly("io.jsonwebtoken:jjwt-jackson:$jjwtVersion")
+
+    val bcVersion by extra { "1.68" }
+    implementation("org.bouncycastle:bcprov-jdk15on:$bcVersion")
 
     val koinVersion by extra { "3.0.1" }
     implementation("io.insert-koin:koin-core:$koinVersion")

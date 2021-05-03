@@ -1,4 +1,5 @@
-import di.authenticationServiceModule
+import di.handlerModule
+import di.serviceModule
 import io.grpc.Server
 import io.grpc.ServerBuilder
 import org.koin.core.component.KoinComponent
@@ -14,7 +15,7 @@ fun main() {
     startKoin {
         logger(PrintLogger())
 
-        modules(authenticationServiceModule)
+        modules(serviceModule, handlerModule)
     }
 
     val server = AuthenticationServer()
