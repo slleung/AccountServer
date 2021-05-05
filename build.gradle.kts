@@ -5,7 +5,7 @@ group = "com.vmiforall"
 version = "1.0-SNAPSHOT"
 
 plugins {
-    kotlin("jvm") version "1.4.32"
+    kotlin("jvm") version "1.5.0"
     id("com.google.protobuf") version "0.8.16"
     id("java")
 }
@@ -66,6 +66,9 @@ protobuf {
 }
 
 dependencies {
+    val kotlinVersion by extra { "1.5.0-RC" }
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinVersion")
+
     val grpcVersion by extra { "1.36.1" }
     implementation("io.grpc:grpc-netty-shaded:$grpcVersion")
     implementation("io.grpc:grpc-protobuf:$grpcVersion")
@@ -83,6 +86,11 @@ dependencies {
 
     val koinVersion by extra { "3.0.1" }
     implementation("io.insert-koin:koin-core:$koinVersion")
+
+    val scyllaDriverVersion by extra { "3.10.2-scylla-1" }
+    implementation("com.scylladb:scylla-driver-core:$scyllaDriverVersion")
+    implementation("com.scylladb:scylla-driver-mapping:$scyllaDriverVersion")
+    implementation("com.scylladb:scylla-driver-extras:$scyllaDriverVersion")
 
     testImplementation(kotlin("test-junit"))
 }

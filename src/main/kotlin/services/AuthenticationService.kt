@@ -7,9 +7,8 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import services.handlers.CreateUserRequestHandler
 
-class AuthenticationService : AuthenticationServiceGrpcKt.AuthenticationServiceCoroutineImplBase(), KoinComponent {
-
-    private val createUserRequestHandler : CreateUserRequestHandler by inject()
+class AuthenticationService(private val createUserRequestHandler: CreateUserRequestHandler) :
+    AuthenticationServiceGrpcKt.AuthenticationServiceCoroutineImplBase() {
 
     override suspend fun createUser(request: AuthenticationProto.CreateUserRequest): AuthenticationProto.CreateUserResponse {
         return createUserRequestHandler.handleRequest(request)

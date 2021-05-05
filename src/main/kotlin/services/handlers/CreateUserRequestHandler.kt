@@ -1,13 +1,17 @@
 package services.handlers
 
 import com.vmiforall.authentication.AuthenticationProto
+import data.source.UserRepository
 import io.jsonwebtoken.Jwt
 import io.jsonwebtoken.Jwts
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import org.bouncycastle.crypto.generators.SCrypt
 import java.security.SecureRandom
 
-class CreateUserRequestHandler :
-    RequestHandler<AuthenticationProto.CreateUserRequest, AuthenticationProto.CreateUserResponse> {
+class CreateUserRequestHandler(
+    private val userRepository: UserRepository
+) : RequestHandler<AuthenticationProto.CreateUserRequest, AuthenticationProto.CreateUserResponse> {
 
     override suspend fun handleRequest(request: AuthenticationProto.CreateUserRequest): AuthenticationProto.CreateUserResponse {
         val email = request.email
@@ -29,12 +33,12 @@ class CreateUserRequestHandler :
         val secret = byteArrayOf(64)    // 64 * 8 = 512 bit
         secureRandom.nextBytes(secret)
 
-        Jwts.builder()
-            .setHeader(mapOf(
-                "alg" to "HS256",
-                "typ" to "jwt"
-            ))
-            .se
+//        Jwts.builder()
+//            .setHeader(mapOf(
+//                "alg" to "HS256",
+//                "typ" to "jwt"
+//            ))
+//            .se
 
         return AuthenticationProto.CreateUserResponse.getDefaultInstance()
     }
