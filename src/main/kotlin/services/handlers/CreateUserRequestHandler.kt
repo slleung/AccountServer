@@ -1,17 +1,20 @@
 package services.handlers
 
+import JwtKeyManager
+import com.google.rpc.Code
+import com.google.rpc.Status
 import com.vmiforall.authentication.AuthenticationProto
 import data.source.UserRepository
-import io.jsonwebtoken.Jwt
 import io.jsonwebtoken.Jwts
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import org.bouncycastle.crypto.generators.SCrypt
 import java.security.SecureRandom
+import java.util.*
 
 class CreateUserRequestHandler(
     private val userRepository: UserRepository
 ) : RequestHandler<AuthenticationProto.CreateUserRequest, AuthenticationProto.CreateUserResponse> {
+
+    private val jwtTokenExpiration = 15 * 60 * 1000L // 15 minutes in milliseconds
 
     override suspend fun handleRequest(request: AuthenticationProto.CreateUserRequest): AuthenticationProto.CreateUserResponse {
         val email = request.email
@@ -30,17 +33,25 @@ class CreateUserRequestHandler(
         // TODO save the hash in the db
 
         // now we give the user a JWT token
-        val secret = byteArrayOf(64)    // 64 * 8 = 512 bit
-        secureRandom.nextBytes(secret)
+        val jwtSecretKey = JwtKeyManager().getJwtSecretKey()
 
-//        Jwts.builder()
-//            .setHeader(mapOf(
-//                "alg" to "HS256",
-//                "typ" to "jwt"
-//            ))
-//            .se
+        val jwtToken = Jwts.builder()
+            .setIssuedAt(Date())
+            .setExpiration(Date(jwtTokenExpiration))
+            .signWith(jwtSecretKey)
+            .compact()
 
-        return AuthenticationProto.CreateUserResponse.getDefaultInstance()
+        return AuthenticationProto.CreateUserResponse.newBuilder()
+            .setStatus(
+                Status.newBuilder()
+                    .setCode(Code.OK.number)
+            )
+            .setJwtToken(jwtToken)
+            .build()
+    }
+
+    fun validateEmail(email: String) : Boolean {
+
     }
 
 }

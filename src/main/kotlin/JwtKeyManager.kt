@@ -1,4 +1,6 @@
 import io.jsonwebtoken.SignatureAlgorithm
+import io.jsonwebtoken.io.Decoders
+import io.jsonwebtoken.io.Encoders
 import io.jsonwebtoken.security.Keys
 import java.io.File
 import java.security.Key
@@ -12,27 +14,43 @@ private val KEY_PATH = KEY_DIRECTORY + File.separator + KEY_FILE_NAME
  */
 class JwtKeyManager {
 
-    fun getSecretKey(): Key {
+    private val keyAlgorithm = SignatureAlgorithm.HS512
 
+    // cache the key to avoid unnecessary file IO
+    private var cachedKey: Key? = null
+
+    fun getJwtSecretKey(): Key {
+        if (cachedKey != null) {
+            return cachedKey as Key
+        }
+
+        if (hasStoredKey()) {
+            cachedKey = readKeyFromStorage()
+        } else {
+            cachedKey = generateKey()
+            writeKeyToStorage(cachedKey as Key)
+        }
+
+        return cachedKey as Key
     }
 
-    private fun generateKey(): String {
-        val key = Keys.secretKeyFor(SignatureAlgorithm.HS256)
+    private fun generateKey(): Key {
+        return Keys.secretKeyFor(keyAlgorithm)
     }
 
-    private fun hasKey() = File(KEY_PATH).exists()
+    private fun hasStoredKey() = File(KEY_PATH).exists()
 
-    private fun readKey() : String {
+    private fun readKeyFromStorage(): Key {
         File(KEY_PATH).bufferedReader().use { bufferedReader ->
-            return bufferedReader.readLine()
+            return Keys.hmacShaKeyFor(Decoders.BASE64.decode(bufferedReader.readLine()))
         }
     }
 
-    private fun writeKey(base64Key: String) {
+    private fun writeKeyToStorage(key: Key) {
         File(KEY_DIRECTORY).mkdirs()
 
         File(KEY_PATH).bufferedWriter().use { bufferedWriter ->
-            bufferedWriter.write(base64Key)
+            bufferedWriter.write(Encoders.BASE64.encode(key.encoded))
             bufferedWriter.flush()
         }
     }

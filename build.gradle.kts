@@ -92,6 +92,9 @@ dependencies {
     implementation("com.scylladb:scylla-driver-mapping:$scyllaDriverVersion")
     implementation("com.scylladb:scylla-driver-extras:$scyllaDriverVersion")
 
+    val apacheCommonsValidatorVersion by extra { "1.7" }
+    implementation("commons-validator:commons-validator:$apacheCommonsValidatorVersion")
+
     testImplementation(kotlin("test-junit"))
 }
 
