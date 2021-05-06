@@ -1,11 +1,11 @@
 package services.handlers
 
+import com.google.rpc.Code
+import com.google.rpc.Status
 import com.vmiforall.authentication.AuthenticationProto
 import data.source.UserRepository
-import io.jsonwebtoken.Jwt
-import io.jsonwebtoken.Jwts
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
+import io.jsonwebtoken.io.Encoders
+import org.apache.commons.validator.routines.EmailValidator
 import org.bouncycastle.crypto.generators.SCrypt
 import java.security.SecureRandom
 
@@ -17,7 +17,25 @@ class CreateUserRequestHandler(
         val email = request.email
         val password = request.password
 
-        // TODO validate credentials
+        if (!validateEmail(email)) {
+            return AuthenticationProto.CreateUserResponse.newBuilder()
+                .setStatus(
+                    Status.newBuilder()
+                        .setCode(Code.INVALID_ARGUMENT_VALUE)
+                        .setMessage("Invalid email")
+                )
+                .build()
+        }
+
+        if (!validatePassword(password)) {
+            return AuthenticationProto.CreateUserResponse.newBuilder()
+                .setStatus(
+                    Status.newBuilder()
+                        .setCode(Code.INVALID_ARGUMENT_VALUE)
+                        .setMessage("Invalid password")
+                )
+                .build()
+        }
 
         // generate salt
         val secureRandom = SecureRandom()
@@ -25,22 +43,28 @@ class CreateUserRequestHandler(
         secureRandom.nextBytes(salt)
 
         // Parameters taken from: https://cryptobook.nakov.com/mac-and-key-derivation/scrypt
-        val hash = SCrypt.generate(password.toByteArray(), salt, 16384, 8, 1, 32)
+        val hash = SCrypt.generate(password.toByteArray(), salt, Constants.SCRYPT_N, Constants.SCRYPT_R, Constants.SCRYPT_P, Constants.SCRYPT_DKLEN)
 
-        // TODO save the hash in the db
+        val user = userRepository.createUser(email, Encoders.BASE64.encode(hash))
 
-        // now we give the user a JWT token
-        val secret = byteArrayOf(64)    // 64 * 8 = 512 bit
-        secureRandom.nextBytes(secret)
+        return AuthenticationProto.CreateUserResponse.newBuilder()
+            .setStatus(
+                Status.newBuilder()
+                    .setCode(Code.OK.number)
+            )
+            .build()
+    }
 
-//        Jwts.builder()
-//            .setHeader(mapOf(
-//                "alg" to "HS256",
-//                "typ" to "jwt"
-//            ))
-//            .se
+    private fun validateEmail(email: String): Boolean {
+        return EmailValidator.getInstance().isValid(email)
+    }
 
-        return AuthenticationProto.CreateUserResponse.getDefaultInstance()
+    private fun validatePassword(password: String): Boolean {
+        // according to NIST, password policy should be very loose so the user does not have difficulty creating passwords
+        if (password.length < 8 || password.length > 128) {
+            return false
+        }
+        return true
     }
 
 }

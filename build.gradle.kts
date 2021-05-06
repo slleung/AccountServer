@@ -68,12 +68,14 @@ protobuf {
 dependencies {
     val kotlinVersion by extra { "1.5.0-RC" }
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinVersion")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinVersion")
 
     val grpcVersion by extra { "1.36.1" }
     implementation("io.grpc:grpc-netty-shaded:$grpcVersion")
     implementation("io.grpc:grpc-protobuf:$grpcVersion")
     implementation("io.grpc:grpc-kotlin-stub:1.0.0")
     implementation("com.google.guava:guava:30.1.1-jre")
+    implementation("org.junit.jupiter:junit-jupiter:5.7.0")
     compileOnly("org.apache.tomcat:annotations-api:6.0.53") // necessary for Java 9+
 
     val jjwtVersion by extra { "0.11.2" }
@@ -86,17 +88,27 @@ dependencies {
 
     val koinVersion by extra { "3.0.1" }
     implementation("io.insert-koin:koin-core:$koinVersion")
+    implementation("io.insert-koin:koin-core-ext:$koinVersion")
+    testImplementation("io.insert-koin:koin-test:$koinVersion")
+    testImplementation("io.insert-koin:koin-test-junit5:$koinVersion")
 
     val scyllaDriverVersion by extra { "3.10.2-scylla-1" }
     implementation("com.scylladb:scylla-driver-core:$scyllaDriverVersion")
     implementation("com.scylladb:scylla-driver-mapping:$scyllaDriverVersion")
     implementation("com.scylladb:scylla-driver-extras:$scyllaDriverVersion")
 
-    testImplementation(kotlin("test-junit"))
+    val apacheCommonsValidatorVersion by extra { "1.7" }
+    implementation("commons-validator:commons-validator:$apacheCommonsValidatorVersion")
+
+    val config4kVersion by extra { "0.4.2" }
+    implementation("io.github.config4k:config4k:$config4kVersion")
+
+    val mockkVersion by extra { "1.11.0" }
+    testImplementation("io.mockk:mockk:$mockkVersion")
 }
 
 tasks.test {
-    useJUnit()
+    useJUnitPlatform()
 }
 
 tasks.withType<KotlinCompile> {

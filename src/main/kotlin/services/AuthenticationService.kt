@@ -14,4 +14,8 @@ class AuthenticationService(private val createUserRequestHandler: CreateUserRequ
         return createUserRequestHandler.handleRequest(request)
     }
 
+    override suspend fun authenticateUser(request: AuthenticationProto.AuthenticateUserRequest): AuthenticationProto.AuthenticateUserResponse {
+        return super.authenticateUser(request)
+    }
+
 }
