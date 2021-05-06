@@ -12,7 +12,7 @@ service AuthenticationService {
 
   rpc CreateUser(CreateUserRequest) returns (CreateUserResponse) {}
 
-  rpc AuthenticateUser(CreateUserRequest) returns (CreateUserResponse) {}
+  rpc AuthenticateUser(AuthenticateUserRequest) returns (AuthenticateUserResponse) {}
 
 }
 

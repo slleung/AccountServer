@@ -6,6 +6,7 @@ import com.google.rpc.Status
 import com.vmiforall.authentication.AuthenticationProto
 import data.source.UserRepository
 import io.jsonwebtoken.Jwts
+import org.apache.commons.validator.routines.EmailValidator
 import org.bouncycastle.crypto.generators.SCrypt
 import java.security.SecureRandom
 import java.util.*
@@ -20,7 +21,25 @@ class CreateUserRequestHandler(
         val email = request.email
         val password = request.password
 
-        // TODO validate credentials
+        if (!validateEmail(email)) {
+            return AuthenticationProto.CreateUserResponse.newBuilder()
+                .setStatus(
+                    Status.newBuilder()
+                        .setCode(Code.INVALID_ARGUMENT_VALUE)
+                        .setMessage("Invalid email")
+                )
+                .build()
+        }
+
+        if (!validatePassword(password)) {
+            return AuthenticationProto.CreateUserResponse.newBuilder()
+                .setStatus(
+                    Status.newBuilder()
+                        .setCode(Code.INVALID_ARGUMENT_VALUE)
+                        .setMessage("Invalid password")
+                )
+                .build()
+        }
 
         // generate salt
         val secureRandom = SecureRandom()
@@ -46,12 +65,19 @@ class CreateUserRequestHandler(
                 Status.newBuilder()
                     .setCode(Code.OK.number)
             )
-            .setJwtToken(jwtToken)
             .build()
     }
 
-    fun validateEmail(email: String) : Boolean {
+    private fun validateEmail(email: String): Boolean {
+        return EmailValidator.getInstance().isValid(email)
+    }
 
+    private fun validatePassword(password: String): Boolean {
+        // according to NIST, password policy should be very loose so the user does not have difficulty creating passwords
+        if (password.length < 8 || password.length > 128) {
+            return false
+        }
+        return true
     }
 
 }
