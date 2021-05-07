@@ -95,6 +95,9 @@ dependencies {
     val apacheCommonsValidatorVersion by extra { "1.7" }
     implementation("commons-validator:commons-validator:$apacheCommonsValidatorVersion")
 
+    val config4kVersion by extra { "0.4.2" }
+    implementation("io.github.config4k:config4k:$config4kVersion")
+
     testImplementation(kotlin("test-junit"))
 }
 
