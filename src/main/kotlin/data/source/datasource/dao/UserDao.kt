@@ -1,5 +1,6 @@
 package data.source.datasource.dao
 
+import com.datastax.driver.core.ResultSet
 import data.User
 
 /**
@@ -7,6 +8,6 @@ import data.User
  */
 interface UserDao {
 
-    suspend fun createUser(email: String, password: String): User
+    suspend fun createUser(email: String, password: String): ResultSet
 
 }

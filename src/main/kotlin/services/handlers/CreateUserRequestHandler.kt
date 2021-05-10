@@ -4,6 +4,7 @@ import com.google.rpc.Code
 import com.google.rpc.Status
 import com.vmiforall.authentication.AuthenticationProto
 import data.source.UserRepository
+import io.jsonwebtoken.io.Encoders
 import org.apache.commons.validator.routines.EmailValidator
 import org.bouncycastle.crypto.generators.SCrypt
 import java.security.SecureRandom
@@ -42,10 +43,9 @@ class CreateUserRequestHandler(
         secureRandom.nextBytes(salt)
 
         // Parameters taken from: https://cryptobook.nakov.com/mac-and-key-derivation/scrypt
-        val hash = SCrypt.generate(password.toByteArray(), salt, Configs.scryptN, Configs.scryptR, Configs.scryptP, Configs.scryptDkLen)
+        val hash = SCrypt.generate(password.toByteArray(), salt, Constants.SCRYPT_N, Constants.SCRYPT_R, Constants.SCRYPT_P, Constants.SCRYPT_DKLEN)
 
-        // TODO save the hash in the db
-
+        val user = userRepository.createUser(email, Encoders.BASE64.encode(hash))
 
         return AuthenticationProto.CreateUserResponse.newBuilder()
             .setStatus(

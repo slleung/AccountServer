@@ -8,6 +8,6 @@ import data.User
  */
 interface UserDataStore {
 
-    suspend fun createUser(email: String, password: String): Result<User>
+    suspend fun createUser(email: String, password: String): Result<Unit>
 
 }

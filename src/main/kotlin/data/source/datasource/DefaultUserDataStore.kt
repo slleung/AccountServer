@@ -6,8 +6,9 @@ import data.source.datasource.dao.UserDao
 
 class DefaultUserDataStore(private val userDao: UserDao): UserDataStore {
 
-    override suspend fun createUser(email: String, password: String): Result<User> {
-        TODO("Not yet implemented")
+    override suspend fun createUser(email: String, password: String): Result<Unit> {
+        userDao.createUser(email, password)
+        return Result.Success(Unit)
     }
 
 }

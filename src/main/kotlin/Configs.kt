@@ -23,9 +23,6 @@ object Configs {
         }
     val jwtExpiration get() = config.extract<Long>("jwt.expiration")
 
-    val scryptN get() = config.extract<Int>("scrypt.n")
-    val scryptR get() = config.extract<Int>("scrypt.r")
-    val scryptP get() = config.extract<Int>("scrypt.p")
-    val scryptDkLen get() = config.extract<Int>("scrypt.dkLen")
-
+    val scyllaIps get() = config.extract<List<String>>("scylla.ips")
+    val scyllaDatacenters get() = config.extract<Map<String, Int>>("scylla.datacenters")
 }
