@@ -1,15 +1,11 @@
 package data.source.datasource.dao
 
+import Configs
 import com.datastax.driver.core.Cluster
 import com.datastax.driver.core.ResultSet
-import data.User
-
-private const val USER_KEYSPACE = "user_keyspace"
-private const val USER_TABLE = "user_table"
-
-private const val COLUMN_ID = "id"
-private const val COLUMN_EMAIL = "email"
-private const val COLUMN_PASSWORD = "password"
+import data.source.datasource.dao.DefaultUserDao.UserStore.UserKeyspace.UserTable.COLUMN_EMAIL
+import data.source.datasource.dao.DefaultUserDao.UserStore.UserKeyspace.UserTable.COLUMN_PASSWORD
+import data.source.datasource.dao.DefaultUserDao.UserStore.UserTable.COLUMN_PASSWORD
 
 /**
  * DAO for the user database.
@@ -36,8 +32,9 @@ class DefaultUserDao : UserDao {
         datacenters.forEach { entry ->
             stringBuilder.append(", '${entry.key}' : ${entry.value}")
         }
-        session.execute("CREATE KEYSPACE IF NOT EXISTS $USER_KEYSPACE WITH replication = {'class': 'NetworkTopologyStrategy'$stringBuilder};")
-        session.execute("CREATE TABLE IF NOT EXISTS $USER_KEYSPACE.$USER_TABLE ($COLUMN_ID int, $COLUMN_EMAIL text, $COLUMN_PASSWORD text, PRIMARY KEY ($COLUMN_ID));")
+        session.execute("CREATE KEYSPACE IF NOT EXISTS $USER_KEYSPACE WITH replication = {'class': 'NetworkTopologyStrategy'$stringBuilder}")
+        session.execute("USE $USER_KEYSPACE")
+        session.execute("CREATE TABLE IF NOT EXISTS $USER_TABLE ($COLUMN_EMAIL text, $COLUMN_PASSWORD text, PRIMARY KEY ($COLUMN_EMAIL))")
 
         Runtime.getRuntime().addShutdownHook(object : Thread() {
             override fun run() {
@@ -47,7 +44,26 @@ class DefaultUserDao : UserDao {
     }
 
     override suspend fun createUser(email: String, password: String): ResultSet {
-        return session.execute("INSERT INTO $USER_KEYSPACE.$USER_TABLE ($COLUMN_EMAIL, $COLUMN_PASSWORD) VALUES ($email, $password);")
+        return session.execute("INSERT INTO $USER_TABLE ($COLUMN_EMAIL, $COLUMN_PASSWORD) VALUES ($email, $password)")
+    }
+
+    private companion object UserStore {
+        // helpful aliases
+        const val USER_KEYSPACE = UserKeyspace.NAME
+        const val USER_TABLE = UserKeyspace.UserTable.NAME
+
+        // data model (schema)
+        object UserKeyspace {
+            const val NAME = "user_keyspace"
+
+            object UserTable {
+                const val NAME = "users"
+
+                const val COLUMN_EMAIL = "email"
+                const val COLUMN_PASSWORD = "password"
+            }
+        }
+
     }
 
 }
