@@ -43,10 +43,14 @@ class DefaultUserDao : UserDao {
     }
 
     override suspend fun createUser(email: String, password: String): ResultSet {
-        return session.execute("INSERT INTO $USER_TABLE ($COLUMN_EMAIL, $COLUMN_PASSWORD) VALUES ($email, $password)")
+        return session.execute("INSERT INTO $USER_TABLE ($COLUMN_EMAIL, $COLUMN_PASSWORD) VALUES ('$email', '$password')")
     }
 
-    private companion object UserStore {
+//    override suspend fun getUser(email: String): ResultSet {
+//
+//    }
+
+    companion object UserStore {
         // helpful aliases
         const val USER_KEYSPACE = UserKeyspace.NAME
         const val USER_TABLE = UserKeyspace.UserTable.NAME
