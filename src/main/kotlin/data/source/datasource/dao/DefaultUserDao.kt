@@ -5,7 +5,6 @@ import com.datastax.driver.core.Cluster
 import com.datastax.driver.core.ResultSet
 import data.source.datasource.dao.DefaultUserDao.UserStore.UserKeyspace.UserTable.COLUMN_EMAIL
 import data.source.datasource.dao.DefaultUserDao.UserStore.UserKeyspace.UserTable.COLUMN_PASSWORD
-import data.source.datasource.dao.DefaultUserDao.UserStore.UserTable.COLUMN_PASSWORD
 
 /**
  * DAO for the user database.
@@ -56,7 +55,11 @@ class DefaultUserDao : UserDao {
         object UserKeyspace {
             const val NAME = "user_keyspace"
 
-            object UserTable {
+            interface BaseColumns {
+
+            }
+
+            object UserTable : BaseColumns {
                 const val NAME = "users"
 
                 const val COLUMN_EMAIL = "email"
