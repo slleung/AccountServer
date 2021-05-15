@@ -1,5 +1,6 @@
 package data.source.datasource.dao
 
+import Configs
 import com.datastax.driver.core.Cluster
 import data.source.datasource.dao.DefaultUserDao.UserStore.USER_KEYSPACE
 import data.source.datasource.dao.DefaultUserDao.UserStore.USER_TABLE
@@ -7,16 +8,12 @@ import data.source.datasource.dao.DefaultUserDao.UserStore.UserKeyspace.UserTabl
 import di.daoModule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runBlockingTest
-import org.junit.Rule
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.koin.core.context.startKoin
-
 import org.koin.test.KoinTest
 import org.koin.test.inject
-import org.koin.test.junit5.KoinTestExtension
 import kotlin.test.assertTrue
 
 class DefaultUserDaoTest : KoinTest {
@@ -54,7 +51,8 @@ class DefaultUserDaoTest : KoinTest {
     }
 
     private fun userExistsInDatabase(email: String): Boolean {
-        return session.execute("SELECT count(*) FROM $USER_KEYSPACE.$USER_TABLE WHERE $COLUMN_EMAIL = '$email'").count() == 1
+        return session.execute("SELECT count(*) FROM $USER_KEYSPACE.$USER_TABLE WHERE $COLUMN_EMAIL = '$email'")
+            .count() == 1
     }
 
 }

@@ -11,8 +11,7 @@ private const val SERVER_PORT = 8080
 // application entry point
 fun main() {
     startKoin {
-        // there is a problem with the koin logger, disabling
-//        printLogger()
+        printLogger()
 
         modules(serviceModule, handlerModule, repositoryModule, dataStoreModule, daoModule)
     }

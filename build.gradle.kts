@@ -67,6 +67,7 @@ protobuf {
 
 dependencies {
     val kotlinVersion by extra { "1.5.0-RC" }
+    implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinVersion")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinVersion")
 
@@ -105,6 +106,13 @@ dependencies {
 
     val mockkVersion by extra { "1.11.0" }
     testImplementation("io.mockk:mockk:$mockkVersion")
+
+    val slf4jVersion by extra { "2.0.0-alpha1" }
+    implementation("org.slf4j:slf4j-api:$slf4jVersion")
+
+    val loggerVersion by extra { "1.3.0-alpha5" }
+    implementation("ch.qos.logback:logback-core:$loggerVersion")
+    implementation("ch.qos.logback:logback-classic:$loggerVersion")
 }
 
 tasks.test {
