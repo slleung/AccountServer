@@ -42,8 +42,15 @@ class DefaultUserDao : UserDao {
         })
     }
 
+    /**
+     * Creates a user.
+     *
+     * @param email The email of the user.
+     * @param password The hashed password of the user.
+     * @return An empty ResultSet. If user already exists, [ResultSet.wasApplied] will return false, else true.
+     */
     override suspend fun createUser(email: String, password: String): ResultSet {
-        return session.execute("INSERT INTO $USER_TABLE ($COLUMN_EMAIL, $COLUMN_PASSWORD) VALUES ('$email', '$password')")
+        return session.execute("INSERT INTO $USER_TABLE ($COLUMN_EMAIL, $COLUMN_PASSWORD) VALUES ('$email', '$password') IF NOT EXISTS")
     }
 
 //    override suspend fun getUser(email: String): ResultSet {

@@ -4,6 +4,7 @@ import io.grpc.ServerBuilder
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.core.context.startKoin
+import org.koin.core.logger.Level
 import services.AuthenticationService
 
 private const val SERVER_PORT = 8080
@@ -11,7 +12,9 @@ private const val SERVER_PORT = 8080
 // application entry point
 fun main() {
     startKoin {
-        printLogger()
+        // Koin internal logging
+        // it is very noisy, so just see errors
+        printLogger(Level.ERROR)
 
         modules(serviceModule, handlerModule, repositoryModule, dataStoreModule, daoModule)
     }
