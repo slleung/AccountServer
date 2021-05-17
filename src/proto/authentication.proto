@@ -6,6 +6,7 @@ option java_outer_classname = "AuthenticationProto";
 package authentication;
 
 import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
 import "google/rpc/status.proto";
 
 service AuthenticationService {
@@ -23,6 +24,7 @@ message CreateUserRequest {
 
 message CreateUserResponse {
   google.rpc.Status status = 1;
+  User user = 2;
 }
 
 message AuthenticateUserRequest {
@@ -33,4 +35,13 @@ message AuthenticateUserRequest {
 message AuthenticateUserResponse {
   google.rpc.Status status = 1;
   string jwtToken = 2;
+  User user = 3;
+}
+
+message User {
+  string email = 1;
+  google.protobuf.Timestamp creationDate = 2;
+  oneof optional_lastLoginDate {
+    google.protobuf.Timestamp lastLoginDate = 3;
+  }
 }

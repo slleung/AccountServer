@@ -10,4 +10,6 @@ interface UserDao {
 
     suspend fun createUser(email: String, password: String): ResultSet
 
+    suspend fun getUser(email: String): ResultSet
+
 }

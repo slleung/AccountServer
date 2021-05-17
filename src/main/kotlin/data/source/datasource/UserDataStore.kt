@@ -10,4 +10,6 @@ interface UserDataStore {
 
     suspend fun createUser(email: String, password: String): Result<Unit>
 
+    suspend fun getUser(email: String): Result<User>
+
 }

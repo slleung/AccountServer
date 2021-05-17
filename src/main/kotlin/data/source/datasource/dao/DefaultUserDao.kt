@@ -3,8 +3,15 @@ package data.source.datasource.dao
 import Configs
 import com.datastax.driver.core.Cluster
 import com.datastax.driver.core.ResultSet
-import data.source.datasource.dao.DefaultUserDao.UserStore.UserKeyspace.UserTable.COLUMN_EMAIL
-import data.source.datasource.dao.DefaultUserDao.UserStore.UserKeyspace.UserTable.COLUMN_PASSWORD
+import com.datastax.driver.mapping.MappingManager
+import data.source.datasource.dao.UserDao.UserStore.USER_KEYSPACE
+import data.source.datasource.dao.UserDao.UserStore.USER_TABLE
+import data.source.datasource.dao.UserDao.UserStore.UserKeyspace.UserTable.COLUMN_CREATION_DATE
+import data.source.datasource.dao.UserDao.UserStore.UserKeyspace.UserTable.COLUMN_EMAIL
+import data.source.datasource.dao.UserDao.UserStore.UserKeyspace.UserTable.COLUMN_LAST_LOGIN_DATE
+import data.source.datasource.dao.UserDao.UserStore.UserKeyspace.UserTable.COLUMN_PASSWORD
+import kotlinx.datetime.LocalDate
+import java.util.*
 
 /**
  * DAO for the user database.
@@ -25,6 +32,10 @@ class DefaultUserDao : UserDao {
         cluster.connect()
     }
 
+    private val mappingManager by lazy {
+        MappingManager(session)
+    }
+
     init {
         val stringBuilder = StringBuilder()
         val datacenters = Configs.scyllaDatacenters
@@ -33,7 +44,15 @@ class DefaultUserDao : UserDao {
         }
         session.execute("CREATE KEYSPACE IF NOT EXISTS $USER_KEYSPACE WITH replication = {'class': 'NetworkTopologyStrategy'$stringBuilder}")
         session.execute("USE $USER_KEYSPACE")
-        session.execute("CREATE TABLE IF NOT EXISTS $USER_TABLE ($COLUMN_EMAIL text, $COLUMN_PASSWORD text, PRIMARY KEY ($COLUMN_EMAIL))")
+        session.execute(
+            "CREATE TABLE IF NOT EXISTS $USER_TABLE (" +
+                    "$COLUMN_EMAIL TEXT, " +
+                    "$COLUMN_PASSWORD TEXT, " +
+                    "$COLUMN_CREATION_DATE TIMESTAMP, " +
+                    "$COLUMN_LAST_LOGIN_DATE TIMESTAMP, " +
+                    "PRIMARY KEY ($COLUMN_EMAIL)" +
+                    ")"
+        )
 
         Runtime.getRuntime().addShutdownHook(object : Thread() {
             override fun run() {
@@ -50,34 +69,11 @@ class DefaultUserDao : UserDao {
      * @return An empty ResultSet. If user already exists, [ResultSet.wasApplied] will return false, else true.
      */
     override suspend fun createUser(email: String, password: String): ResultSet {
-        return session.execute("INSERT INTO $USER_TABLE ($COLUMN_EMAIL, $COLUMN_PASSWORD) VALUES ('$email', '$password') IF NOT EXISTS")
+        return session.execute("INSERT INTO $USER_TABLE ($COLUMN_EMAIL, $COLUMN_PASSWORD, $COLUMN_CREATION_DATE) VALUES ('$email', '$password', ${}) IF NOT EXISTS")
     }
 
-//    override suspend fun getUser(email: String): ResultSet {
-//
-//    }
-
-    companion object UserStore {
-        // helpful aliases
-        const val USER_KEYSPACE = UserKeyspace.NAME
-        const val USER_TABLE = UserKeyspace.UserTable.NAME
-
-        // data model (schema)
-        object UserKeyspace {
-            const val NAME = "user_keyspace"
-
-            interface BaseColumns {
-
-            }
-
-            object UserTable : BaseColumns {
-                const val NAME = "users"
-
-                const val COLUMN_EMAIL = "email"
-                const val COLUMN_PASSWORD = "password"
-            }
-        }
-
+    override suspend fun getUser(email: String): ResultSet {
+        return session.execute("SELECT * FROM $USER_TABLE WHERE $COLUMN_EMAIL = '$email'")
     }
 
 }

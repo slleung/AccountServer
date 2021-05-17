@@ -2,10 +2,10 @@ package data.source.datasource.dao
 
 import Configs
 import com.datastax.driver.core.Cluster
-import data.source.datasource.dao.DefaultUserDao.UserStore.USER_KEYSPACE
-import data.source.datasource.dao.DefaultUserDao.UserStore.USER_TABLE
-import data.source.datasource.dao.DefaultUserDao.UserStore.UserKeyspace.UserTable.COLUMN_EMAIL
-import data.source.datasource.dao.DefaultUserDao.UserStore.UserKeyspace.UserTable.COLUMN_PASSWORD
+import data.source.datasource.dao.UserDao.UserStore.USER_KEYSPACE
+import data.source.datasource.dao.UserDao.UserStore.USER_TABLE
+import data.source.datasource.dao.UserDao.UserStore.UserKeyspace.UserTable.COLUMN_EMAIL
+import data.source.datasource.dao.UserDao.UserStore.UserKeyspace.UserTable.COLUMN_PASSWORD
 import di.daoModule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runBlockingTest
@@ -16,6 +16,7 @@ import org.koin.test.inject
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
+@ExperimentalCoroutinesApi
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class DefaultUserDaoTest : KoinTest {
 
@@ -44,7 +45,6 @@ class DefaultUserDaoTest : KoinTest {
     fun tearDown() {
     }
 
-    @ExperimentalCoroutinesApi
     @Test
     fun `Create a user`() = runBlockingTest {
         val email = "test@email.com"
@@ -57,7 +57,6 @@ class DefaultUserDaoTest : KoinTest {
         assertTrue(userExistsInDatabase(email))
     }
 
-    @ExperimentalCoroutinesApi
     @Test
     fun `Create a user already exists`() = runBlockingTest {
         val email = "test@email.com"
@@ -68,6 +67,17 @@ class DefaultUserDaoTest : KoinTest {
 
         assertFalse(resultSet.wasApplied())
         assertTrue(userExistsInDatabase(email))
+    }
+
+    @Test
+    fun `Get a user by email`() = runBlockingTest {
+        val email = "test@email.com"
+        val password = "password"   // pretend this is hashed
+        insertUserIntoDatabase(email, password)
+
+        val resultSet = userDao.getUser(email)
+
+        assertTrue(resultSet.count() == 1)
     }
 
     private fun userExistsInDatabase(email: String): Boolean {

@@ -71,6 +71,9 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinVersion")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinVersion")
 
+    val kotlinDateTimeVersion by extra { "0.2.0" }
+    implementation("org.jetbrains.kotlinx:kotlinx-datetime:$kotlinDateTimeVersion")
+
     val grpcVersion by extra { "1.36.1" }
     implementation("io.grpc:grpc-netty-shaded:$grpcVersion")
     implementation("io.grpc:grpc-protobuf:$grpcVersion")
