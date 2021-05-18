@@ -2,10 +2,10 @@ package data.source.datasource.dao
 
 import Configs
 import com.datastax.driver.core.Cluster
-import data.source.datasource.dao.UserDao.UserStore.USER_KEYSPACE
-import data.source.datasource.dao.UserDao.UserStore.USER_TABLE
-import data.source.datasource.dao.UserDao.UserStore.UserKeyspace.UserTable.COLUMN_EMAIL
-import data.source.datasource.dao.UserDao.UserStore.UserKeyspace.UserTable.COLUMN_PASSWORD
+import data.COLUMN_EMAIL
+import data.COLUMN_PASSWORD
+import data.USER_KEYSPACE
+import data.USER_TABLE
 import di.daoModule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runBlockingTest

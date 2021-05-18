@@ -3,15 +3,9 @@ package data.source.datasource.dao
 import Configs
 import com.datastax.driver.core.Cluster
 import com.datastax.driver.core.ResultSet
+import com.datastax.driver.core.schemabuilder.SchemaBuilder
 import com.datastax.driver.mapping.MappingManager
-import data.source.datasource.dao.UserDao.UserStore.USER_KEYSPACE
-import data.source.datasource.dao.UserDao.UserStore.USER_TABLE
-import data.source.datasource.dao.UserDao.UserStore.UserKeyspace.UserTable.COLUMN_CREATION_DATE
-import data.source.datasource.dao.UserDao.UserStore.UserKeyspace.UserTable.COLUMN_EMAIL
-import data.source.datasource.dao.UserDao.UserStore.UserKeyspace.UserTable.COLUMN_LAST_LOGIN_DATE
-import data.source.datasource.dao.UserDao.UserStore.UserKeyspace.UserTable.COLUMN_PASSWORD
-import kotlinx.datetime.LocalDate
-import java.util.*
+import data.*
 
 /**
  * DAO for the user database.
@@ -46,6 +40,7 @@ class DefaultUserDao : UserDao {
         session.execute("USE $USER_KEYSPACE")
         session.execute(
             "CREATE TABLE IF NOT EXISTS $USER_TABLE (" +
+                    "$COLUMN_UUID UUID, " +
                     "$COLUMN_EMAIL TEXT, " +
                     "$COLUMN_PASSWORD TEXT, " +
                     "$COLUMN_CREATION_DATE TIMESTAMP, " +
