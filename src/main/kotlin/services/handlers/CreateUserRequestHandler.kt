@@ -4,6 +4,7 @@ import com.google.rpc.Code
 import com.google.rpc.Status
 import com.vmiforall.authentication.AuthenticationProto
 import data.Result
+import data.User
 import data.source.UserRepository
 import io.jsonwebtoken.io.Encoders
 import org.apache.commons.validator.routines.EmailValidator
@@ -36,7 +37,7 @@ class CreateUserRequestHandler(
             Constants.SCRYPT_DKLEN
         )
 
-        val result = userRepository.createUser(email, Encoders.BASE64.encode(hash))
+        val result = userRepository.insertUser(User(email = email, passwordHash = Encoders.BASE64.encode(hash)))
 
         return when (result) {
             is Result.Success -> {

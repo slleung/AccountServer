@@ -16,8 +16,8 @@ val serviceModule = module {
 }
 
 val handlerModule = module {
-    single { CreateUserRequestHandler(userRepository = get()) }
-    single { AuthenticateUserRequestHandler(userRepository = get()) }
+    single { CreateUserRequestHandler(get()) }
+    single { AuthenticateUserRequestHandler(get()) }
 }
 
 val repositoryModule = module {

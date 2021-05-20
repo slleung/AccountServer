@@ -14,5 +14,6 @@ sealed class Error(val code: Int, val message: String) {
     }
 
     data class AlreadyExistsError(val msg: String) : Error(Code.ALREADY_EXISTS_VALUE, msg)
+    data class NotFoundError(val msg: String) : Error(Code.NOT_FOUND_VALUE, msg)
 
 }

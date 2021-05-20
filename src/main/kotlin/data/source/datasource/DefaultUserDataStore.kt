@@ -1,25 +1,35 @@
 package data.source.datasource
 
-import data.Error.AlreadyExistsError
+import data.Error.*
 import data.Error.GenericError
 import data.Result
 import data.User
 import data.source.datasource.dao.UserDao
-import data.source.datasource.dao.UserDao.UserStore.UserKeyspace.UserTable.COLUMN_CREATION_DATE
-import data.source.datasource.dao.UserDao.UserStore.UserKeyspace.UserTable.COLUMN_EMAIL
-import data.source.datasource.dao.UserDao.UserStore.UserKeyspace.UserTable.COLUMN_PASSWORD
-import kotlinx.datetime.LocalDate
+import java.util.*
 
 class DefaultUserDataStore(private val userDao: UserDao) : UserDataStore {
 
-    override suspend fun createUser(email: String, password: String): Result<Unit> {
-        return try {
-            val resultSet = userDao.createUser(email, password)
+    override suspend fun insertUser(user: User): Result<Unit> {
+        try {
+            if (userDao.getUser(user.email) != null) {
+                return Result.Failure(AlreadyExistsError("Email already exists."))
+            }
 
-            if (resultSet.wasApplied()) {
-                Result.Success(Unit)
+            userDao.insertUser(user)
+            return Result.Success(Unit)
+        } catch (e: Exception) {
+            return Result.Failure(GenericError(e))
+        }
+    }
+
+    override suspend fun getUser(id: UUID): Result<User> {
+        return try {
+            val user = userDao.getUser(id)
+
+            if (user != null) {
+                Result.Success(user)
             } else {
-                Result.Failure(AlreadyExistsError("User already exists."))
+                Result.Failure(NotFoundError("User does not exist."))
             }
         } catch (e: Exception) {
             Result.Failure(GenericError(e))
@@ -28,20 +38,16 @@ class DefaultUserDataStore(private val userDao: UserDao) : UserDataStore {
 
     override suspend fun getUser(email: String): Result<User> {
         return try {
-            val resultSet = userDao.getUser(email)
+            val user = userDao.getUser(email)
 
-            if (resultSet.count() != 0) {
-                val row = resultSet.one()
-                val email = row.getString(COLUMN_EMAIL)
-                val password = row.getString(COLUMN_PASSWORD)
-                val creationDate = LocalDate() row.getTimestamp(COLUMN_CREATION_DATE)
-                val lastLoginDate = row.getTimestamp(COLUMN_CREATION_DATE)
-
-                val user = User(email, password, creationDate, lastLoginDate)
+            if (user != null) {
+                Result.Success(user)
+            } else {
+                Result.Failure(NotFoundError("User does not exist."))
             }
-            resultSet.
         } catch (e: Exception) {
             Result.Failure(GenericError(e))
         }
     }
+
 }

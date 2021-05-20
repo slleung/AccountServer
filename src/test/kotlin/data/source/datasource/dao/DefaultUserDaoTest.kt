@@ -2,32 +2,34 @@ package data.source.datasource.dao
 
 import Configs
 import com.datastax.driver.core.Cluster
-import data.COLUMN_EMAIL
-import data.COLUMN_PASSWORD
-import data.USER_KEYSPACE
-import data.USER_TABLE
+import com.datastax.driver.mapping.Mapper
+import com.datastax.driver.mapping.MappingManager
+import data.User
 import di.daoModule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runBlockingTest
-import org.junit.jupiter.api.*
-import org.koin.core.context.startKoin
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.extension.RegisterExtension
 import org.koin.test.KoinTest
 import org.koin.test.inject
-import kotlin.test.assertFalse
+import org.koin.test.junit5.KoinTestExtension
+import java.util.*
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 @ExperimentalCoroutinesApi
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class DefaultUserDaoTest : KoinTest {
+internal class DefaultUserDaoTest : KoinTest {
 
-    @BeforeAll
-    fun setUpAll() {
-        startKoin {
-            modules(daoModule)
-        }
+    @JvmField
+    @RegisterExtension
+    val koinTestExtension = KoinTestExtension.create {
+        modules(daoModule)
     }
 
-    private val userDao: UserDao by inject()
+    // init block of dao is not called before DI
+    private val defaultUserDao: UserDao by inject()
 
     private val session by lazy {
         val clusterBuilder = Cluster.Builder()
@@ -37,60 +39,75 @@ class DefaultUserDaoTest : KoinTest {
         clusterBuilder.build().connect()
     }
 
-    @BeforeEach
-    fun setUp() {
+    private val mappingManager by lazy {
+        MappingManager(session)
     }
 
-    @AfterEach
-    fun tearDown() {
+    private val userMapper by lazy {
+        mappingManager.mapper(User::class.java).apply {
+            setDefaultSaveOptions(Mapper.Option.saveNullFields(false))
+        }
     }
 
     @Test
     fun `Create a user`() = runBlockingTest {
-        val email = "test@email.com"
-        val password = "password"   // pretend this is hashed
-        deleteUserFromDatabase(email)
+        val newUser = User(
+            UUID.fromString("123e4567-e89b-42d3-a456-556642440000"),
+            "test@email.com",
+            "passwordHash",
+            Date(1621490432)
+        )
+        deleteUserFromDatabase(newUser)
 
-        val resultSet = userDao.createUser(email, password)
+        defaultUserDao.insertUser(newUser)
 
-        assertTrue(resultSet.wasApplied())
-        assertTrue(userExistsInDatabase(email))
+        assertTrue(userExistsInDatabase(newUser), "User not found in database after insert.")
     }
 
     @Test
     fun `Create a user already exists`() = runBlockingTest {
-        val email = "test@email.com"
-        val password = "password"   // pretend this is hashed
-        insertUserIntoDatabase(email, password)
+        val newUser = User(
+            UUID.fromString("123e4567-e89b-42d3-a456-556642440000"),
+            "test@email.com",
+            "passwordHash",
+            Date(1621490432)
+        )
+        insertUserIntoDatabase(newUser)
 
-        val resultSet = userDao.createUser(email, password)
+        defaultUserDao.insertUser(newUser)
 
-        assertFalse(resultSet.wasApplied())
-        assertTrue(userExistsInDatabase(email))
+        assertTrue(userExistsInDatabase(newUser), "User not found in database after insert.")
     }
 
     @Test
     fun `Get a user by email`() = runBlockingTest {
-        val email = "test@email.com"
-        val password = "password"   // pretend this is hashed
-        insertUserIntoDatabase(email, password)
+        val newUser = User(
+            UUID.fromString("123e4567-e89b-42d3-a456-556642440000"),
+            "test@email.com",
+            "passwordHash",
+            Date(1621490432)
+        )
+        insertUserIntoDatabase(newUser)
 
-        val resultSet = userDao.getUser(email)
+        val user = defaultUserDao.getUser(newUser.email)
 
-        assertTrue(resultSet.count() == 1)
+        assertNotNull(user, "Could not find a user by email.")
     }
 
-    private fun userExistsInDatabase(email: String): Boolean {
-        return session.execute("SELECT count(*) FROM $USER_KEYSPACE.$USER_TABLE WHERE $COLUMN_EMAIL = '$email'")
-            .count() == 1
+    private fun userExistsInDatabase(user: User): Boolean {
+        return userMapper.get(user.id) != null
     }
 
-    private fun insertUserIntoDatabase(email: String, password: String) {
-        session.execute("INSERT INTO $USER_KEYSPACE.$USER_TABLE ($COLUMN_EMAIL, $COLUMN_PASSWORD) VALUES ('$email', '$password')")
+    private fun insertUserIntoDatabase(user: User) {
+        userMapper.save(user)
     }
 
-    private fun deleteUserFromDatabase(email: String) {
-        session.execute("DELETE FROM $USER_KEYSPACE.$USER_TABLE WHERE $COLUMN_EMAIL = '$email' IF EXISTS")
+    private fun deleteUserFromDatabase(user: User) {
+        userMapper.delete(user)
+    }
+
+    private fun deleteUserFromDatabase(id: UUID) {
+        userMapper.delete(id)
     }
 
 }

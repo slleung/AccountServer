@@ -1,15 +1,17 @@
 package data.source.datasource.dao
 
-import com.datastax.driver.core.ResultSet
 import data.User
+import java.util.*
 
 /**
  * The Dao performs the actual communication with the database.
  */
 interface UserDao {
 
-    suspend fun createUser(email: String, password: String): ResultSet
+    suspend fun insertUser(user: User)
 
-    suspend fun getUser(email: String): ResultSet
+    suspend fun getUser(id: UUID): User?
+
+    suspend fun getUser(email: String): User?
 
 }

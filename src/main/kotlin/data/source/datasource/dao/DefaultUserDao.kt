@@ -2,10 +2,12 @@ package data.source.datasource.dao
 
 import Configs
 import com.datastax.driver.core.Cluster
-import com.datastax.driver.core.ResultSet
-import com.datastax.driver.core.schemabuilder.SchemaBuilder
+import com.datastax.driver.core.DataType
+import com.datastax.driver.core.schemabuilder.SchemaBuilder.*
+import com.datastax.driver.mapping.Mapper.Option.*
 import com.datastax.driver.mapping.MappingManager
 import data.*
+import java.util.*
 
 /**
  * DAO for the user database.
@@ -30,23 +32,39 @@ class DefaultUserDao : UserDao {
         MappingManager(session)
     }
 
-    init {
-        val stringBuilder = StringBuilder()
-        val datacenters = Configs.scyllaDatacenters
-        datacenters.forEach { entry ->
-            stringBuilder.append(", '${entry.key}' : ${entry.value}")
+    private val userMapper by lazy {
+        mappingManager.mapper(User::class.java).apply {
+            setDefaultSaveOptions(saveNullFields(false))
         }
-        session.execute("CREATE KEYSPACE IF NOT EXISTS $USER_KEYSPACE WITH replication = {'class': 'NetworkTopologyStrategy'$stringBuilder}")
-        session.execute("USE $USER_KEYSPACE")
+    }
+
+    private val userByEmailMapper by lazy {
+        mappingManager.mapper(UserByEmail::class.java).apply {
+            setDefaultSaveOptions(saveNullFields(false))
+        }
+    }
+
+    init {
+        val datacenters = Configs.scyllaDatacenters.map { entry ->
+            entry.key to entry.value.toString()
+        }.toMap()
         session.execute(
-            "CREATE TABLE IF NOT EXISTS $USER_TABLE (" +
-                    "$COLUMN_UUID UUID, " +
-                    "$COLUMN_EMAIL TEXT, " +
-                    "$COLUMN_PASSWORD TEXT, " +
-                    "$COLUMN_CREATION_DATE TIMESTAMP, " +
-                    "$COLUMN_LAST_LOGIN_DATE TIMESTAMP, " +
-                    "PRIMARY KEY ($COLUMN_EMAIL)" +
-                    ")"
+            createKeyspace(USER_KEYSPACE).ifNotExists().with()
+                .replication(mapOf("class" to "NetworkTopologyStrategy").plus(datacenters))
+        )
+        session.execute(
+            createTable(USER_KEYSPACE, USER_TABLE).ifNotExists()
+                .addPartitionKey(COLUMN_ID, DataType.uuid())
+                .addColumn(COLUMN_EMAIL, DataType.text())
+                .addColumn(COLUMN_PASSWORD_HASH, DataType.text())
+                .addColumn(COLUMN_CREATION_DATE, DataType.timestamp())
+                .addColumn(COLUMN_LAST_LOGIN_DATE, DataType.timestamp())
+        )
+        session.execute(
+            "CREATE MATERIALIZED VIEW IF NOT EXISTS $USER_KEYSPACE.$USER_BY_EMAIL_MV AS " +
+                    "SELECT * FROM $USER_KEYSPACE.$USER_TABLE " +
+                    "WHERE $COLUMN_EMAIL IS NOT NULL " +
+                    "PRIMARY KEY($COLUMN_EMAIL, $COLUMN_ID)"
         )
 
         Runtime.getRuntime().addShutdownHook(object : Thread() {
@@ -57,18 +75,20 @@ class DefaultUserDao : UserDao {
     }
 
     /**
-     * Creates a user.
+     * Creates a user. The caller must check whether the email is unique first.
      *
-     * @param email The email of the user.
-     * @param password The hashed password of the user.
-     * @return An empty ResultSet. If user already exists, [ResultSet.wasApplied] will return false, else true.
+     * @param user The new user.
      */
-    override suspend fun createUser(email: String, password: String): ResultSet {
-        return session.execute("INSERT INTO $USER_TABLE ($COLUMN_EMAIL, $COLUMN_PASSWORD, $COLUMN_CREATION_DATE) VALUES ('$email', '$password', ${}) IF NOT EXISTS")
+    override suspend fun insertUser(user: User) {
+        userMapper.save(user, ifNotExists(true))
     }
 
-    override suspend fun getUser(email: String): ResultSet {
-        return session.execute("SELECT * FROM $USER_TABLE WHERE $COLUMN_EMAIL = '$email'")
+    override suspend fun getUser(id: UUID): User? {
+        return userMapper.get(id)
+    }
+
+    override suspend fun getUser(email: String): User? {
+        return userByEmailMapper.get(email)?.toUser()
     }
 
 }

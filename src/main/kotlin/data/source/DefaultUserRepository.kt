@@ -15,9 +15,9 @@ class DefaultUserRepository(
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : UserRepository {
 
-    override suspend fun createUser(email: String, password: String): Result<Unit> {
+    override suspend fun insertUser(user: User): Result<Unit> {
         return withContext(ioDispatcher) {
-            userDataStore.createUser(email, password)
+            userDataStore.insertUser(user)
         }
     }
 
