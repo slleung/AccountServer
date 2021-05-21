@@ -116,6 +116,9 @@ dependencies {
     val loggerVersion by extra { "1.3.0-alpha5" }
     implementation("ch.qos.logback:logback-core:$loggerVersion")
     implementation("ch.qos.logback:logback-classic:$loggerVersion")
+
+    val kotestVersion by extra { "4.6.0" }
+    testImplementation("io.kotest:kotest-assertions-core:$kotestVersion")
 }
 
 tasks.test {

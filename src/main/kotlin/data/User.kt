@@ -35,7 +35,7 @@ private interface UserMV {
 @Table(keyspace = USER_KEYSPACE, name = USER_BY_EMAIL_MV)
 data class UserByEmail(
     @PartitionKey @Column(name = COLUMN_EMAIL) val email: String = "",
-    @ClusteringColumn @Column(name = COLUMN_ID) val id: UUID = UUID.randomUUID(),
+    @Column(name = COLUMN_ID) val id: UUID = UUID.randomUUID(),
     @Column(name = COLUMN_PASSWORD_HASH) val passwordHash: String = "",   // base64 encoded
     @Column(name = COLUMN_CREATION_DATE) val creationDate: Date = Date(),
     @Column(name = COLUMN_LAST_LOGIN_DATE) val lastLoginDate: Date = creationDate

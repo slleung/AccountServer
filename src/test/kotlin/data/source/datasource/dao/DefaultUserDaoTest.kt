@@ -1,11 +1,10 @@
 package data.source.datasource.dao
 
-import Configs
-import com.datastax.driver.core.Cluster
-import com.datastax.driver.mapping.Mapper
-import com.datastax.driver.mapping.MappingManager
 import data.User
 import di.daoModule
+import helpers.initDb
+import helpers.userExistsInDatabase
+import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.jupiter.api.Test
@@ -15,8 +14,6 @@ import org.koin.test.KoinTest
 import org.koin.test.inject
 import org.koin.test.junit5.KoinTestExtension
 import java.util.*
-import kotlin.test.assertNotNull
-import kotlin.test.assertTrue
 
 @ExperimentalCoroutinesApi
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -31,83 +28,41 @@ internal class DefaultUserDaoTest : KoinTest {
     // init block of dao is not called before DI
     private val defaultUserDao: UserDao by inject()
 
-    private val session by lazy {
-        val clusterBuilder = Cluster.Builder()
-        Configs.scyllaIps.forEach { ip ->
-            clusterBuilder.addContactPoint(ip)
-        }
-        clusterBuilder.build().connect()
-    }
-
-    private val mappingManager by lazy {
-        MappingManager(session)
-    }
-
-    private val userMapper by lazy {
-        mappingManager.mapper(User::class.java).apply {
-            setDefaultSaveOptions(Mapper.Option.saveNullFields(false))
-        }
+    private val testUser1 by lazy {
+        User(
+            UUID.fromString("00000000-0000-0000-0000-000000000001"),
+            "testUser1@email.com",
+            "testUser1",
+            Date(1621490432)
+        )
     }
 
     @Test
     fun `Create a user`() = runBlockingTest {
-        val newUser = User(
-            UUID.fromString("123e4567-e89b-42d3-a456-556642440000"),
-            "test@email.com",
-            "passwordHash",
-            Date(1621490432)
-        )
-        deleteUserFromDatabase(newUser)
+        initDb()
 
-        defaultUserDao.insertUser(newUser)
+        defaultUserDao.insertUser(testUser1)
 
-        assertTrue(userExistsInDatabase(newUser), "User not found in database after insert.")
+        userExistsInDatabase(testUser1) shouldBe true
     }
 
     @Test
     fun `Create a user already exists`() = runBlockingTest {
-        val newUser = User(
-            UUID.fromString("123e4567-e89b-42d3-a456-556642440000"),
-            "test@email.com",
-            "passwordHash",
-            Date(1621490432)
-        )
-        insertUserIntoDatabase(newUser)
+        initDb(testUser1)
 
-        defaultUserDao.insertUser(newUser)
+        defaultUserDao.insertUser(testUser1)
 
-        assertTrue(userExistsInDatabase(newUser), "User not found in database after insert.")
+        userExistsInDatabase(testUser1) shouldBe true
     }
 
     @Test
     fun `Get a user by email`() = runBlockingTest {
-        val newUser = User(
-            UUID.fromString("123e4567-e89b-42d3-a456-556642440000"),
-            "test@email.com",
-            "passwordHash",
-            Date(1621490432)
-        )
-        insertUserIntoDatabase(newUser)
+        initDb(testUser1)
 
-        val user = defaultUserDao.getUser(newUser.email)
+        val actualUser = defaultUserDao.getUser(testUser1.email)
 
-        assertNotNull(user, "Could not find a user by email.")
-    }
-
-    private fun userExistsInDatabase(user: User): Boolean {
-        return userMapper.get(user.id) != null
-    }
-
-    private fun insertUserIntoDatabase(user: User) {
-        userMapper.save(user)
-    }
-
-    private fun deleteUserFromDatabase(user: User) {
-        userMapper.delete(user)
-    }
-
-    private fun deleteUserFromDatabase(id: UUID) {
-        userMapper.delete(id)
+        val expectedUser = testUser1
+        actualUser shouldBe expectedUser
     }
 
 }
