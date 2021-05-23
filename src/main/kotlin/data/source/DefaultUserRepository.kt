@@ -33,4 +33,10 @@ class DefaultUserRepository(
             userDataSource.getUser(email)
         }
     }
+
+    override suspend fun updateUser(user: User): Result<Unit> {
+        return withContext(ioDispatcher) {
+            userDataSource.updateUser(user)
+        }
+    }
 }

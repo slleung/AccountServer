@@ -2,7 +2,7 @@ package services.handlers
 
 import com.google.rpc.Code
 import com.google.rpc.Status
-import com.vmiforall.authentication.AuthenticationProto
+import com.vmiforall.authentication.AuthenticationProto.*
 import data.Result
 import data.User
 import data.source.UserRepository
@@ -13,9 +13,9 @@ import java.security.SecureRandom
 
 class CreateUserRequestHandler(
     private val userRepository: UserRepository
-) : RequestHandler<AuthenticationProto.CreateUserRequest, AuthenticationProto.CreateUserResponse> {
+) : RequestHandler<CreateUserRequest, CreateUserResponse> {
 
-    override suspend fun handleRequest(request: AuthenticationProto.CreateUserRequest): AuthenticationProto.CreateUserResponse {
+    override suspend fun handleRequest(request: CreateUserRequest): CreateUserResponse {
         val email = request.email
         val password = request.password
 
@@ -27,20 +27,22 @@ class CreateUserRequestHandler(
             return invalidPasswordResponse()
         }
 
+        val salt = generateSalt()
+
         // Parameters taken from: https://cryptobook.nakov.com/mac-and-key-derivation/scrypt
         val hash = SCrypt.generate(
             password.toByteArray(),
-            generateSalt(),
+            salt,
             Constants.SCRYPT_N,
             Constants.SCRYPT_R,
             Constants.SCRYPT_P,
             Constants.SCRYPT_DKLEN
         )
 
-        val result = userRepository.insertUser(User(email = email, passwordHash = Encoders.BASE64.encode(hash)))
+        val result = userRepository.insertUser(User(email = email, passwordHash = Encoders.BASE64.encode(hash + salt)))
 
         return when (result) {
-            is Result.Success -> successResponse(result)
+            is Result.Success -> successResponse()
             is Result.Failure -> failureResponse(result)
         }
     }
@@ -59,13 +61,13 @@ class CreateUserRequestHandler(
 
     private fun generateSalt(): ByteArray {
         val secureRandom = SecureRandom()
-        val salt = byteArrayOf(16)  // 16 * 8 = 128 bit
+        val salt = ByteArray(Constants.SALT_LEN)
         secureRandom.nextBytes(salt)
         return salt
     }
 
-    private fun invalidEmailResponse(): AuthenticationProto.CreateUserResponse {
-        return AuthenticationProto.CreateUserResponse.newBuilder()
+    private fun invalidEmailResponse(): CreateUserResponse {
+        return CreateUserResponse.newBuilder()
             .setStatus(
                 Status.newBuilder()
                     .setCode(Code.INVALID_ARGUMENT_VALUE)
@@ -75,8 +77,8 @@ class CreateUserRequestHandler(
             .build()
     }
 
-    private fun invalidPasswordResponse(): AuthenticationProto.CreateUserResponse {
-        return AuthenticationProto.CreateUserResponse.newBuilder()
+    private fun invalidPasswordResponse(): CreateUserResponse {
+        return CreateUserResponse.newBuilder()
             .setStatus(
                 Status.newBuilder()
                     .setCode(Code.INVALID_ARGUMENT_VALUE)
@@ -86,8 +88,8 @@ class CreateUserRequestHandler(
             .build()
     }
 
-    private fun successResponse(result: Result.Success<Unit>): AuthenticationProto.CreateUserResponse {
-        return AuthenticationProto.CreateUserResponse.newBuilder()
+    private fun successResponse(): CreateUserResponse {
+        return CreateUserResponse.newBuilder()
             .setStatus(
                 Status.newBuilder()
                     .setCode(Code.OK.number)
@@ -96,8 +98,8 @@ class CreateUserRequestHandler(
             .build()
     }
 
-    private fun failureResponse(result: Result.Failure): AuthenticationProto.CreateUserResponse {
-        return AuthenticationProto.CreateUserResponse.newBuilder()
+    private fun failureResponse(result: Result.Failure): CreateUserResponse {
+        return CreateUserResponse.newBuilder()
             .setStatus(
                 Status.newBuilder()
                     .setCode(result.error.code)

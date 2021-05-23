@@ -50,4 +50,17 @@ class DefaultUserDataSource(private val userDao: UserDao) : UserDataSource {
         }
     }
 
+    override suspend fun updateUser(user: User): Result<Unit> {
+        try {
+            if (userDao.getUser(user.id) == null) {
+                return Result.Failure(NotFoundError("User does not exist."))
+            }
+
+            userDao.updateUser(user)
+            return Result.Success(Unit)
+        } catch (e: Exception) {
+            return Result.Failure(GenericError(e))
+        }
+    }
+
 }

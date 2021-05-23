@@ -13,7 +13,7 @@ import services.handlers.AuthenticateUserRequestHandler
 import services.handlers.CreateUserRequestHandler
 
 val serviceModule = module {
-    single { AuthenticationService(get()) }
+    single { AuthenticationService(get(), get()) }
 }
 
 val handlerModule = module {

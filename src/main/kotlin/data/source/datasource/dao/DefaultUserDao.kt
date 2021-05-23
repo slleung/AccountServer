@@ -91,4 +91,7 @@ class DefaultUserDao : UserDao {
         return userByEmailMapper.get(email)?.toUser()
     }
 
+    override suspend fun updateUser(user: User) {
+        userMapper.save(user, ifNotExists(false))
+    }
 }

@@ -14,4 +14,6 @@ interface UserDao {
 
     suspend fun getUser(email: String): User?
 
+    suspend fun updateUser(user: User)
+
 }
