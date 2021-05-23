@@ -5,7 +5,7 @@ group = "com.vmiforall"
 version = "1.0-SNAPSHOT"
 
 plugins {
-    kotlin("jvm") version "1.4.32"
+    kotlin("jvm") version "1.5.0"
     id("com.google.protobuf") version "0.8.16"
     id("java")
 }
@@ -66,28 +66,63 @@ protobuf {
 }
 
 dependencies {
+    val kotlinVersion by extra { "1.5.0-RC" }
+    implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinVersion")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinVersion")
+
+    val kotlinDateTimeVersion by extra { "0.2.0" }
+    implementation("org.jetbrains.kotlinx:kotlinx-datetime:$kotlinDateTimeVersion")
+
     val grpcVersion by extra { "1.36.1" }
     implementation("io.grpc:grpc-netty-shaded:$grpcVersion")
     implementation("io.grpc:grpc-protobuf:$grpcVersion")
     implementation("io.grpc:grpc-kotlin-stub:1.0.0")
     implementation("com.google.guava:guava:30.1.1-jre")
+    implementation("org.junit.jupiter:junit-jupiter:5.7.0")
     compileOnly("org.apache.tomcat:annotations-api:6.0.53") // necessary for Java 9+
 
     val jjwtVersion by extra { "0.11.2" }
     implementation("io.jsonwebtoken:jjwt-api:$jjwtVersion")
     runtimeOnly("io.jsonwebtoken:jjwt-impl:$jjwtVersion")
-    runtimeOnly("io.jsonwebtoken:jjwt-jackson:$jjwtVersion")  // or 'io.jsonwebtoken:jjwt-gson:0.11.2' for gson
-    // Uncomment the next line if you want to use RSASSA-PSS (PS256, PS384, PS512) algorithms:
-    //'org.bouncycastle:bcprov-jdk15on:1.60',
+    runtimeOnly("io.jsonwebtoken:jjwt-jackson:$jjwtVersion")
+
+    val bcVersion by extra { "1.68" }
+    implementation("org.bouncycastle:bcprov-jdk15on:$bcVersion")
 
     val koinVersion by extra { "3.0.1" }
     implementation("io.insert-koin:koin-core:$koinVersion")
+    implementation("io.insert-koin:koin-core-ext:$koinVersion")
+    testImplementation("io.insert-koin:koin-test:$koinVersion")
+    testImplementation("io.insert-koin:koin-test-junit5:$koinVersion")
 
-    testImplementation(kotlin("test-junit"))
+    val scyllaDriverVersion by extra { "3.10.2-scylla-1" }
+    implementation("com.scylladb:scylla-driver-core:$scyllaDriverVersion")
+    implementation("com.scylladb:scylla-driver-mapping:$scyllaDriverVersion")
+    implementation("com.scylladb:scylla-driver-extras:$scyllaDriverVersion")
+
+    val apacheCommonsValidatorVersion by extra { "1.7" }
+    implementation("commons-validator:commons-validator:$apacheCommonsValidatorVersion")
+
+    val config4kVersion by extra { "0.4.2" }
+    implementation("io.github.config4k:config4k:$config4kVersion")
+
+    val mockkVersion by extra { "1.11.0" }
+    testImplementation("io.mockk:mockk:$mockkVersion")
+
+    val slf4jVersion by extra { "2.0.0-alpha1" }
+    implementation("org.slf4j:slf4j-api:$slf4jVersion")
+
+    val loggerVersion by extra { "1.3.0-alpha5" }
+    implementation("ch.qos.logback:logback-core:$loggerVersion")
+    implementation("ch.qos.logback:logback-classic:$loggerVersion")
+
+    val kotestVersion by extra { "4.6.0" }
+    testImplementation("io.kotest:kotest-assertions-core:$kotestVersion")
 }
 
 tasks.test {
-    useJUnit()
+    useJUnitPlatform()
 }
 
 tasks.withType<KotlinCompile> {
