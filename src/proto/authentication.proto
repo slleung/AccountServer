@@ -15,6 +15,8 @@ service AuthenticationService {
 
   rpc AuthenticateUser(AuthenticateUserRequest) returns (AuthenticateUserResponse) {}
 
+  rpc GetUser(GetUserRequest) returns (GetUserResponse) {}
+
 }
 
 message CreateUserRequest {
@@ -24,7 +26,6 @@ message CreateUserRequest {
 
 message CreateUserResponse {
   google.rpc.Status status = 1;
-  User user = 2;
 }
 
 message AuthenticateUserRequest {
@@ -38,10 +39,18 @@ message AuthenticateUserResponse {
   User user = 3;
 }
 
+message GetUserRequest {
+  string id = 1;
+}
+
+message GetUserResponse {
+  google.rpc.Status status = 1;
+  User user = 2;
+}
+
 message User {
-  string email = 1;
-  google.protobuf.Timestamp creationDate = 2;
-  oneof optional_lastLoginDate {
-    google.protobuf.Timestamp lastLoginDate = 3;
-  }
+  string id = 1;
+  string email = 2;
+  google.protobuf.Timestamp creationDate = 3;
+  google.protobuf.Timestamp lastLoginDate = 4;
 }

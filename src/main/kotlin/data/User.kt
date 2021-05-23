@@ -1,6 +1,5 @@
 package data
 
-import com.datastax.driver.mapping.annotations.ClusteringColumn
 import com.datastax.driver.mapping.annotations.Column
 import com.datastax.driver.mapping.annotations.PartitionKey
 import com.datastax.driver.mapping.annotations.Table
@@ -15,9 +14,6 @@ const val COLUMN_EMAIL = "email"
 const val COLUMN_PASSWORD_HASH = "password_hash"
 const val COLUMN_CREATION_DATE = "creation_date"
 const val COLUMN_LAST_LOGIN_DATE = "last_login_date"
-
-// these are Java beans, all fields must be nullable
-// too bad our ScyllaDb driver is in Java, one day when we get a Kotlin driver this will look better
 
 @Table(keyspace = USER_KEYSPACE, name = USER_TABLE)
 data class User(

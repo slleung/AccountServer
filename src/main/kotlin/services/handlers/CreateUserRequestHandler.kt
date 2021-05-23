@@ -40,25 +40,8 @@ class CreateUserRequestHandler(
         val result = userRepository.insertUser(User(email = email, passwordHash = Encoders.BASE64.encode(hash)))
 
         return when (result) {
-            is Result.Success -> {
-                AuthenticationProto.CreateUserResponse.newBuilder()
-                    .setStatus(
-                        Status.newBuilder()
-                            .setCode(Code.OK.number)
-                            .build()
-                    )
-                    .build()
-            }
-            is Result.Failure -> {
-                AuthenticationProto.CreateUserResponse.newBuilder()
-                    .setStatus(
-                        Status.newBuilder()
-                            .setCode(result.error.code)
-                            .setMessage(result.error.message)
-                            .build()
-                    )
-                    .build()
-            }
+            is Result.Success -> successResponse(result)
+            is Result.Failure -> failureResponse(result)
         }
     }
 
@@ -72,6 +55,13 @@ class CreateUserRequestHandler(
             return false
         }
         return true
+    }
+
+    private fun generateSalt(): ByteArray {
+        val secureRandom = SecureRandom()
+        val salt = byteArrayOf(16)  // 16 * 8 = 128 bit
+        secureRandom.nextBytes(salt)
+        return salt
     }
 
     private fun invalidEmailResponse(): AuthenticationProto.CreateUserResponse {
@@ -96,11 +86,24 @@ class CreateUserRequestHandler(
             .build()
     }
 
-    private fun generateSalt(): ByteArray {
-        val secureRandom = SecureRandom()
-        val salt = byteArrayOf(16)  // 16 * 8 = 128 bit
-        secureRandom.nextBytes(salt)
-        return salt
+    private fun successResponse(result: Result.Success<Unit>): AuthenticationProto.CreateUserResponse {
+        return AuthenticationProto.CreateUserResponse.newBuilder()
+            .setStatus(
+                Status.newBuilder()
+                    .setCode(Code.OK.number)
+                    .build()
+            )
+            .build()
     }
 
+    private fun failureResponse(result: Result.Failure): AuthenticationProto.CreateUserResponse {
+        return AuthenticationProto.CreateUserResponse.newBuilder()
+            .setStatus(
+                Status.newBuilder()
+                    .setCode(result.error.code)
+                    .setMessage(result.error.message)
+                    .build()
+            )
+            .build()
+    }
 }

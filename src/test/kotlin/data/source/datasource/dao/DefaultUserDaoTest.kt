@@ -2,8 +2,9 @@ package data.source.datasource.dao
 
 import data.User
 import di.daoModule
+import helpers.existsInDb
 import helpers.initDb
-import helpers.userExistsInDatabase
+import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runBlockingTest
@@ -43,7 +44,7 @@ internal class DefaultUserDaoTest : KoinTest {
 
         defaultUserDao.insertUser(testUser1)
 
-        userExistsInDatabase(testUser1) shouldBe true
+        testUser1 should existsInDb()
     }
 
     @Test
@@ -52,7 +53,17 @@ internal class DefaultUserDaoTest : KoinTest {
 
         defaultUserDao.insertUser(testUser1)
 
-        userExistsInDatabase(testUser1) shouldBe true
+        testUser1 should existsInDb()
+    }
+
+    @Test
+    fun `Get a user by id`() = runBlockingTest {
+        initDb(testUser1)
+
+        val actualUser = defaultUserDao.getUser(testUser1.id)
+
+        val expectedUser = testUser1
+        actualUser shouldBe expectedUser
     }
 
     @Test

@@ -7,7 +7,7 @@ import data.User
 import data.source.datasource.dao.UserDao
 import java.util.*
 
-class DefaultUserDataStore(private val userDao: UserDao) : UserDataStore {
+class DefaultUserDataSource(private val userDao: UserDao) : UserDataSource {
 
     override suspend fun insertUser(user: User): Result<Unit> {
         try {

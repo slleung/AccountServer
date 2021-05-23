@@ -2,10 +2,11 @@ package di
 
 import data.source.DefaultUserRepository
 import data.source.UserRepository
-import data.source.datasource.DefaultUserDataStore
-import data.source.datasource.UserDataStore
+import data.source.datasource.DefaultUserDataSource
+import data.source.datasource.UserDataSource
 import data.source.datasource.dao.DefaultUserDao
 import data.source.datasource.dao.UserDao
+import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import services.AuthenticationService
 import services.handlers.AuthenticateUserRequestHandler
@@ -21,11 +22,11 @@ val handlerModule = module {
 }
 
 val repositoryModule = module {
-    single<UserRepository> { DefaultUserRepository(get()) }
+    single<UserRepository> { DefaultUserRepository(get(), get(qualifier = named(IO))) }
 }
 
-val dataStoreModule = module {
-    single<UserDataStore> { DefaultUserDataStore(get()) }
+val dataSourceModule = module {
+    single<UserDataSource> { DefaultUserDataSource(get()) }
 }
 
 val daoModule = module {

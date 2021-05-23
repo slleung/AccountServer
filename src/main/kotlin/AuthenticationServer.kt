@@ -16,7 +16,7 @@ fun main() {
         // it is very noisy, so just see errors
         printLogger(Level.ERROR)
 
-        modules(serviceModule, handlerModule, repositoryModule, dataStoreModule, daoModule)
+        modules(serviceModule, handlerModule, repositoryModule, dataSourceModule, daoModule, dispatchersModule)
     }
 
     val server = AuthenticationServer()

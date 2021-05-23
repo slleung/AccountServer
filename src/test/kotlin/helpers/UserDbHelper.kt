@@ -7,6 +7,8 @@ import com.datastax.driver.mapping.MappingManager
 import data.USER_KEYSPACE
 import data.USER_TABLE
 import data.User
+import io.kotest.matchers.Matcher
+import io.kotest.matchers.MatcherResult
 import java.util.*
 
 private val session by lazy {
@@ -28,34 +30,42 @@ private val userMapper by lazy {
 }
 
 /**
- * Init the table with the supplied users.
+ * Init the [USER_TABLE] table with the supplied users.
  *
  * If none is supplied, the table will be empty.
  */
 fun initDb(vararg elements: User) {
-    clearDatabase()
+    clearUserTable()
 
     elements.forEach { user ->
-        insertUserIntoDatabase(user)
+        insertUserIntoUserTable(user)
     }
 }
 
-private fun clearDatabase() {
+private fun clearUserTable() {
     session.execute(QueryBuilder.truncate(USER_KEYSPACE, USER_TABLE))
 }
 
-fun userExistsInDatabase(user: User): Boolean {
+private fun userExistsInUserTable(user: User): Boolean {
     return userMapper.get(user.id) != null
 }
 
-fun insertUserIntoDatabase(user: User) {
+private fun insertUserIntoUserTable(user: User) {
     userMapper.save(user)
 }
 
-fun deleteUserFromDatabase(user: User) {
+private fun deleteUserFromUserTable(user: User) {
     userMapper.delete(user)
 }
 
-fun deleteUserFromDatabase(id: UUID) {
+private fun deleteUserFromUserTable(id: UUID) {
     userMapper.delete(id)
+}
+
+fun existsInDb() = object : Matcher<User> {
+    override fun test(value: User) = MatcherResult(
+        userExistsInUserTable(value),
+        "User $value should exist in user table",
+        "User $value should not exist in user table"
+    )
 }

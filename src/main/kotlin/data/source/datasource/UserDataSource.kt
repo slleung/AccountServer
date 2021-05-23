@@ -7,7 +7,7 @@ import java.util.*
 /**
  * The datastore wraps data from DAO with [Result] and present them to the repositories.
  */
-interface UserDataStore {
+interface UserDataSource {
 
     suspend fun insertUser(user: User): Result<Unit>
 
