@@ -1,6 +1,12 @@
 package services.handlers
 
 import Configs
+import Constants.JWT_USER_ID
+import Constants.SALT_LEN
+import Constants.SCRYPT_DKLEN
+import Constants.SCRYPT_N
+import Constants.SCRYPT_P
+import Constants.SCRYPT_R
 import com.google.protobuf.Timestamp
 import com.google.rpc.Code
 import com.google.rpc.Status
@@ -34,27 +40,27 @@ class AuthenticateUserRequestHandler(
 
         val user = (result as Result.Success).data
 
-        val savedPasswordHash = user.passwordHash
-        val savedHashLength = (Constants.SCRYPT_DKLEN * Constants.BASE64_EXPANSION_FACTOR).toInt()
-        val savedHash = Decoders.BASE64.decode(savedPasswordHash.substring(0, savedHashLength + 1))
-        val savedSalt = Decoders.BASE64.decode(savedPasswordHash.substring(savedHashLength + 1))
+        val savedPasswordHash = Decoders.BASE64.decode(user.passwordHash)
+        val savedHash = savedPasswordHash.copyOfRange(0, SCRYPT_DKLEN)
+        val savedSalt = savedPasswordHash.copyOfRange(SCRYPT_DKLEN, SCRYPT_DKLEN + SALT_LEN)
 
         val newHash = SCrypt.generate(
             password.toByteArray(),
             savedSalt,
-            Constants.SCRYPT_N,
-            Constants.SCRYPT_R,
-            Constants.SCRYPT_P,
-            Constants.SCRYPT_DKLEN
+            SCRYPT_N,
+            SCRYPT_R,
+            SCRYPT_P,
+            SCRYPT_DKLEN
         )
 
-        if (!newHash.equals(savedHash)) {
+        if (!newHash.contentEquals(savedHash)) {
             return incorrectEmailOrPasswordResponse()
         }
 
         val jwtToken = Jwts.builder()
             .setIssuedAt(Date())
             .setExpiration(Date(System.currentTimeMillis() + Configs.jwtExpiration))
+            .claim(JWT_USER_ID, user.id.toString())
             .signWith(Configs.jwtSecret)
             .compact()
 
