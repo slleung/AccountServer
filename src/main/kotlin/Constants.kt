@@ -7,5 +7,5 @@ object Constants {
 
     const val SALT_LEN = 16
 
-    const val BASE64_EXPANSION_FACTOR = 1.33
+    const val JWT_USER_ID = "userId"
 }

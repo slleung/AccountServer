@@ -76,4 +76,13 @@ internal class DefaultUserDaoTest : KoinTest {
         actualUser shouldBe expectedUser
     }
 
+    @Test
+    fun `Update a user`() = runBlockingTest {
+        initDb()
+
+        defaultUserDao.updateUser(testUser1)    // upsert
+
+        testUser1 should existsInDb()
+    }
+
 }

@@ -67,4 +67,15 @@ internal class DefaultUserRepositoryTest : KoinTest {
         result shouldBe instanceOf<Result.Success<User>>()
     }
 
+    @Test
+    fun `Update a user`() = runBlockingTest {
+        initDb(testUser1)
+        val newLoginDate = Date(12345)
+        val changedUser = testUser1.copy(lastLoginDate = newLoginDate)
+
+        val result = defaultUserRepository.updateUser(changedUser)
+
+        result shouldBe instanceOf<Result.Success<Unit>>()
+    }
+
 }

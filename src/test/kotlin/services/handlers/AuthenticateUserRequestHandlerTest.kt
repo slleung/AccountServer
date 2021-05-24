@@ -7,6 +7,7 @@ import data.User
 import di.*
 import helpers.initDb
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.jupiter.api.Test
@@ -35,7 +36,7 @@ internal class AuthenticateUserRequestHandlerTest : KoinTest {
         User(
             UUID.fromString("c5813fd8-4453-48cb-af88-e5fadd127487"),
             "test@email.com",
-            "X03WldjB4fUev5nC05RY7rcbjcDD8UkrCC+4NxRN2UemXgS6kx8oyHFcaF3ODs/6", // password: "password"
+            "w6oJ/yTye32FDgejdwuPMEtnKVwj1VPTRSgKRPGnKEiQhMjq4NXbDkK+ECGEPSw1", // password: "password"
             Date(1621490432),
             Date(1621490432)
         )
@@ -52,5 +53,23 @@ internal class AuthenticateUserRequestHandlerTest : KoinTest {
         val response = authenticateUserRequestHandler.handleRequest(request)
 
         response.status.code shouldBe Code.OK_VALUE
+        response.jwtToken shouldNotBe null
+        response.user.id shouldBe testUser1.id.toString()
     }
+
+    @Test
+    fun `Handle wrong password request`() = runBlockingTest {
+        initDb(testUser1)
+        val request = AuthenticateUserRequest.newBuilder()
+            .setEmail(testUser1.email)
+            .setPassword("wrong_password")
+            .build()
+
+        val response = authenticateUserRequestHandler.handleRequest(request)
+
+        response.status.code shouldBe Code.INVALID_ARGUMENT_VALUE
+        response.jwtToken shouldBe ""
+        response.user.id shouldBe ""
+    }
+
 }
