@@ -1,3 +1,3 @@
-# AuthenticationServer
+# AccountServer
 
-An authentication server written in Kotlin. Uses grpc for communication.
+An account server written in Kotlin. Uses grpc for communication. Handles authentication.
