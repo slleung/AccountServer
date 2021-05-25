@@ -10,9 +10,9 @@ import Constants.SCRYPT_R
 import com.google.protobuf.Timestamp
 import com.google.rpc.Code
 import com.google.rpc.Status
-import com.vmiforall.authentication.AuthenticationProto
-import com.vmiforall.authentication.AuthenticationProto.AuthenticateUserRequest
-import com.vmiforall.authentication.AuthenticationProto.AuthenticateUserResponse
+import com.vmiforall.account.AccountProto
+import com.vmiforall.account.AccountProto.AuthenticateUserRequest
+import com.vmiforall.account.AccountProto.AuthenticateUserResponse
 import data.Result
 import data.User
 import data.source.UserRepository
@@ -104,7 +104,7 @@ class AuthenticateUserRequestHandler(
             )
             .setJwtToken(jwt)
             .setUser(
-                AuthenticationProto.User.newBuilder()
+                AccountProto.User.newBuilder()
                     .setId(user.id.toString())
                     .setEmail(user.email)
                     .setCreationDate(

@@ -5,7 +5,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.core.context.startKoin
 import org.koin.core.logger.Level
-import services.AuthenticationService
+import services.AccountService
 
 private const val SERVER_PORT = 8080
 
@@ -19,7 +19,7 @@ fun main() {
         modules(serviceModule, handlerModule, repositoryModule, dataSourceModule, daoModule, dispatchersModule)
     }
 
-    val server = AuthenticationServer()
+    val server = AccountServer()
     server.start()
 
     Runtime.getRuntime().addShutdownHook(object : Thread() {
@@ -31,14 +31,14 @@ fun main() {
     server.awaitTermination()
 }
 
-class AuthenticationServer : KoinComponent {
+class AccountServer : KoinComponent {
 
-    private val authenticationService: AuthenticationService by inject()
+    private val accountService: AccountService by inject()
 
     private val server: Server by lazy {
         ServerBuilder.forPort(SERVER_PORT) // TODO Enable TLS
 //            .useTransportSecurity(certChainFile, privateKeyFile)
-            .addService(authenticationService)
+            .addService(accountService)
             .build()
     }
 

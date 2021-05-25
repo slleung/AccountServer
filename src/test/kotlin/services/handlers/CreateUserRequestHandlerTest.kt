@@ -2,17 +2,15 @@ package services.handlers
 
 import com.google.rpc.Code
 import com.google.rpc.Status
-import com.vmiforall.authentication.AuthenticationProto
+import com.vmiforall.account.AccountProto.CreateUserRequest
+import com.vmiforall.account.AccountProto.CreateUserResponse
 import di.*
 import helpers.initDb
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runBlockingTest
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.RegisterExtension
 import org.koin.test.KoinTest
@@ -34,14 +32,14 @@ internal class CreateUserRequestHandlerTest : KoinTest {
     @Test
     fun `Handle normal request`() = runBlockingTest {
         initDb()
-        val request = AuthenticationProto.CreateUserRequest.newBuilder()
+        val request = CreateUserRequest.newBuilder()
             .setEmail("test@email.com")
             .setPassword("password")
             .build()
 
         val actualResponse = createUserRequestHandler.handleRequest(request)
 
-        val expectedResponse = AuthenticationProto.CreateUserResponse.newBuilder()
+        val expectedResponse = CreateUserResponse.newBuilder()
             .setStatus(
                 Status.newBuilder()
                     .setCode(Code.OK.number)

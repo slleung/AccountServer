@@ -2,7 +2,7 @@ package services.handlers
 
 import com.google.rpc.Code
 import com.google.rpc.Status
-import com.vmiforall.authentication.AuthenticationProto.*
+import com.vmiforall.account.AccountProto.*
 import data.Result
 import data.User
 import data.source.UserRepository

@@ -44,6 +44,12 @@ class DefaultUserDao : UserDao {
         }
     }
 
+    private val userEmailVerificationMapper by lazy {
+        mappingManager.mapper(UserEmailVerificationCode::class.java).apply {
+            setDefaultSaveOptions(saveNullFields(false))
+        }
+    }
+
     init {
         val datacenters = Configs.scyllaDatacenters.map { entry ->
             entry.key to entry.value.toString()
@@ -59,12 +65,19 @@ class DefaultUserDao : UserDao {
                 .addColumn(COLUMN_PASSWORD_HASH, DataType.text())
                 .addColumn(COLUMN_CREATION_DATE, DataType.timestamp())
                 .addColumn(COLUMN_LAST_LOGIN_DATE, DataType.timestamp())
+                .addColumn(COLUMN_VERIFICATION_STATE, DataType.text())
         )
         session.execute(
             "CREATE MATERIALIZED VIEW IF NOT EXISTS $USER_KEYSPACE.$USER_BY_EMAIL_MV AS " +
                     "SELECT * FROM $USER_KEYSPACE.$USER_TABLE " +
                     "WHERE $COLUMN_EMAIL IS NOT NULL " +
                     "PRIMARY KEY($COLUMN_EMAIL, $COLUMN_ID)"
+        )
+        session.execute(
+            createTable(USER_KEYSPACE, USER_EMAIL_VERIFICATION_CODE_TABLE).ifNotExists()
+                .addPartitionKey(COLUMN_ID, DataType.uuid())
+                .addColumn(COLUMN_EMAIL, DataType.text())
+                .addColumn(COLUMN_VERIFICATION_CODE, DataType.text())
         )
 
         Runtime.getRuntime().addShutdownHook(object : Thread() {
@@ -93,5 +106,9 @@ class DefaultUserDao : UserDao {
 
     override suspend fun updateUser(user: User) {
         userMapper.save(user, ifNotExists(false))
+    }
+
+    override suspend fun insertUserEmailVerification(user: User) {
+        TODO("Not yet implemented")
     }
 }

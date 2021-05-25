@@ -8,17 +8,19 @@ import data.source.datasource.dao.DefaultUserDao
 import data.source.datasource.dao.UserDao
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
-import services.AuthenticationService
+import services.AccountService
 import services.handlers.AuthenticateUserRequestHandler
 import services.handlers.CreateUserRequestHandler
+import services.handlers.VerifyUserEmailRequestHandler
 
 val serviceModule = module {
-    single { AuthenticationService(get(), get()) }
+    single { AccountService(get(), get(), get()) }
 }
 
 val handlerModule = module {
     single { CreateUserRequestHandler(get()) }
     single { AuthenticateUserRequestHandler(get()) }
+    single { VerifyUserEmailRequestHandler(get()) }
 }
 
 val repositoryModule = module {

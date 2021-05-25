@@ -1,8 +1,7 @@
 package services.handlers
 
 import com.google.rpc.Code
-import com.vmiforall.authentication.AuthenticationProto.AuthenticateUserRequest
-import com.vmiforall.authentication.AuthenticationProto.AuthenticateUserResponse
+import com.vmiforall.account.AccountProto.AuthenticateUserRequest
 import data.User
 import di.*
 import helpers.initDb
@@ -11,8 +10,6 @@ import io.kotest.matchers.shouldNotBe
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.jupiter.api.Test
-
-import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.RegisterExtension
 import org.koin.test.KoinTest

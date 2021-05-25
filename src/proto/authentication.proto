@@ -1,21 +1,23 @@
 syntax = "proto3";
 
-option java_package = "com.vmiforall.authentication";
-option java_outer_classname = "AuthenticationProto";
+option java_package = "com.vmiforall.account";
+option java_outer_classname = "AccountProto";
 
-package authentication;
+package account;
 
 import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
 import "google/rpc/status.proto";
 
-service AuthenticationService {
+service AccountService {
 
   rpc CreateUser(CreateUserRequest) returns (CreateUserResponse) {}
 
+  rpc VerifyUserEmail(VerifyUserEmailRequest) returns (VerifyUserEmailResponse) {}
+
   rpc AuthenticateUser(AuthenticateUserRequest) returns (AuthenticateUserResponse) {}
 
-  rpc GetUser(GetUserRequest) returns (GetUserResponse) {}
+//  rpc GetUser(GetUserRequest) returns (GetUserResponse) {}
 
 }
 
@@ -26,6 +28,18 @@ message CreateUserRequest {
 
 message CreateUserResponse {
   google.rpc.Status status = 1;
+}
+
+message VerifyUserEmailRequest {
+  string email = 1;
+  string code = 2;
+}
+
+// after verifying the user, the user is automatically logged in
+message VerifyUserEmailResponse {
+  google.rpc.Status status = 1;
+  string jwtToken = 2;
+  User user = 3;
 }
 
 message AuthenticateUserRequest {
@@ -39,18 +53,25 @@ message AuthenticateUserResponse {
   User user = 3;
 }
 
-message GetUserRequest {
-  string id = 1;
-}
-
-message GetUserResponse {
-  google.rpc.Status status = 1;
-  User user = 2;
-}
+//message GetUserRequest {
+//  string id = 1;
+//}
+//
+//message GetUserResponse {
+//  google.rpc.Status status = 1;
+//  User user = 2;
+//}
 
 message User {
   string id = 1;
   string email = 2;
   google.protobuf.Timestamp creationDate = 3;
+  // if the user has never logged in before, lastLoginDate equals creationDate
   google.protobuf.Timestamp lastLoginDate = 4;
+  enum VerificationState {
+    UNKNOWN = 0;
+    UNVERIFIED = 1;
+    EMAIL_VERIFIED = 2;
+  }
+  VerificationState verificationState = 5;
 }

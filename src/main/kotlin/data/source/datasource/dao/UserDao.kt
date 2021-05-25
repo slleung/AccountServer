@@ -16,4 +16,5 @@ interface UserDao {
 
     suspend fun updateUser(user: User)
 
+    suspend fun insertUserEmailVerification(user: User)
 }
