@@ -1,7 +1,7 @@
 package services.handlers
 
 import Configs
-import Constants.JWT_USER_ID
+import Constants.JWT_CLAIM_USER_ID
 import Constants.SALT_LEN
 import Constants.SCRYPT_DKLEN
 import Constants.SCRYPT_N
@@ -60,7 +60,7 @@ class AuthenticateUserRequestHandler(
         val jwtToken = Jwts.builder()
             .setIssuedAt(Date())
             .setExpiration(Date(System.currentTimeMillis() + Configs.jwtExpiration))
-            .claim(JWT_USER_ID, user.id.toString())
+            .claim(JWT_CLAIM_USER_ID, user.id.toString())
             .signWith(Configs.jwtSecret)
             .compact()
 

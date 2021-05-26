@@ -16,12 +16,12 @@ class AccountService(
         return createUserRequestHandler.handleRequest(request)
     }
 
-    override suspend fun authenticateUser(request: AuthenticateUserRequest): AuthenticateUserResponse {
-        return authenticateUserRequestHandler.handleRequest(request)
-    }
-
     override suspend fun verifyUserEmail(request: VerifyUserEmailRequest): VerifyUserEmailResponse {
         return verifyUserEmailRequestHandler.handleRequest(request)
+    }
+
+    override suspend fun authenticateUser(request: AuthenticateUserRequest): AuthenticateUserResponse {
+        return authenticateUserRequestHandler.handleRequest(request)
     }
 
 }

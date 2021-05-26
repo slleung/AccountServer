@@ -4,10 +4,15 @@ import data.Error.*
 import data.Error.GenericError
 import data.Result
 import data.User
+import data.source.datasource.dao.DefaultEmailVerificationDao
+import data.source.datasource.dao.EmailVerificationCodeDao
 import data.source.datasource.dao.UserDao
 import java.util.*
 
-class DefaultUserDataSource(private val userDao: UserDao) : UserDataSource {
+class DefaultUserDataSource(
+    private val userDao: UserDao,
+    private val emailVerificationCodeDao: EmailVerificationCodeDao
+) : UserDataSource {
 
     override suspend fun insertUser(user: User): Result<Unit> {
         try {
@@ -62,5 +67,7 @@ class DefaultUserDataSource(private val userDao: UserDao) : UserDataSource {
             return Result.Failure(GenericError(e))
         }
     }
+
+
 
 }

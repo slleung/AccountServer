@@ -4,7 +4,9 @@ import data.source.DefaultUserRepository
 import data.source.UserRepository
 import data.source.datasource.DefaultUserDataSource
 import data.source.datasource.UserDataSource
+import data.source.datasource.dao.DefaultEmailVerificationDao
 import data.source.datasource.dao.DefaultUserDao
+import data.source.datasource.dao.EmailVerificationCodeDao
 import data.source.datasource.dao.UserDao
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
@@ -28,9 +30,10 @@ val repositoryModule = module {
 }
 
 val dataSourceModule = module {
-    single<UserDataSource> { DefaultUserDataSource(get()) }
+    single<UserDataSource> { DefaultUserDataSource(get(), get()) }
 }
 
 val daoModule = module {
     single<UserDao> { DefaultUserDao() }
+    single<EmailVerificationCodeDao> { DefaultEmailVerificationDao() }
 }
