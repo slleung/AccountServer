@@ -42,7 +42,7 @@ internal class DefaultUserDaoTest : KoinTest {
     fun `Create a user`() = runBlockingTest {
         initDb()
 
-        defaultUserDao.insertUser(testUser1)
+        defaultUserDao.insert(testUser1)
 
         testUser1 should existsInDb()
     }
@@ -51,7 +51,7 @@ internal class DefaultUserDaoTest : KoinTest {
     fun `Create a user already exists`() = runBlockingTest {
         initDb(testUser1)
 
-        defaultUserDao.insertUser(testUser1)
+        defaultUserDao.insert(testUser1)
 
         testUser1 should existsInDb()
     }
@@ -60,7 +60,7 @@ internal class DefaultUserDaoTest : KoinTest {
     fun `Get a user by id`() = runBlockingTest {
         initDb(testUser1)
 
-        val actualUser = defaultUserDao.getUser(testUser1.id)
+        val actualUser = defaultUserDao.get(testUser1.id)
 
         val expectedUser = testUser1
         actualUser shouldBe expectedUser
@@ -70,7 +70,7 @@ internal class DefaultUserDaoTest : KoinTest {
     fun `Get a user by email`() = runBlockingTest {
         initDb(testUser1)
 
-        val actualUser = defaultUserDao.getUser(testUser1.email)
+        val actualUser = defaultUserDao.get(testUser1.email)
 
         val expectedUser = testUser1
         actualUser shouldBe expectedUser
@@ -80,7 +80,7 @@ internal class DefaultUserDaoTest : KoinTest {
     fun `Update a user`() = runBlockingTest {
         initDb()
 
-        defaultUserDao.updateUser(testUser1)    // upsert
+        defaultUserDao.update(testUser1)    // upsert
 
         testUser1 should existsInDb()
     }

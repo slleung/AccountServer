@@ -89,19 +89,19 @@ class DefaultUserDao : UserDao {
      *
      * @param user The new user.
      */
-    override suspend fun insertUser(user: User) {
+    override suspend fun insert(user: User) {
         userMapper.save(user, ifNotExists(true))
     }
 
-    override suspend fun getUser(id: UUID): User? {
+    override suspend fun get(id: UUID): User? {
         return userMapper.get(id)
     }
 
-    override suspend fun getUser(email: String): User? {
+    override suspend fun get(email: String): User? {
         return userByEmailMapper.get(email)?.toUser()
     }
 
-    override suspend fun updateUser(user: User) {
+    override suspend fun update(user: User) {
         userMapper.save(user, ifNotExists(false))
     }
 

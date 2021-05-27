@@ -7,7 +7,7 @@ import data.EmailVerificationCode
 import data.EmailVerificationCodeByEmail
 import java.util.*
 
-class DefaultEmailVerificationDao : EmailVerificationCodeDao {
+class DefaultEmailVerificationCodeDao : EmailVerificationCodeDao {
 
     private val cluster by lazy {
         val clusterBuilder = Cluster.Builder()

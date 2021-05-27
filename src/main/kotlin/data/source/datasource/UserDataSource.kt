@@ -9,12 +9,12 @@ import java.util.*
  */
 interface UserDataSource {
 
-    suspend fun insertUser(user: User): Result<Unit>
+    suspend fun insert(user: User): Result<Unit>
 
-    suspend fun getUser(id: UUID): Result<User>
+    suspend fun get(id: UUID): Result<User>
 
-    suspend fun getUser(email: String): Result<User>
+    suspend fun get(email: String): Result<User>
 
-    suspend fun updateUser(user: User): Result<Unit>
+    suspend fun update(user: User): Result<Unit>
 
 }

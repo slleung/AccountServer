@@ -8,12 +8,12 @@ import java.util.*
  */
 interface UserDao {
 
-    suspend fun insertUser(user: User)
+    suspend fun insert(user: User)
 
-    suspend fun getUser(id: UUID): User?
+    suspend fun get(id: UUID): User?
 
-    suspend fun getUser(email: String): User?
+    suspend fun get(email: String): User?
 
-    suspend fun updateUser(user: User)
+    suspend fun update(user: User)
 
 }

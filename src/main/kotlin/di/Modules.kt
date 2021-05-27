@@ -2,9 +2,11 @@ package di
 
 import data.source.DefaultUserRepository
 import data.source.UserRepository
+import data.source.datasource.DefaultEmailVerificationCodeDataSource
 import data.source.datasource.DefaultUserDataSource
+import data.source.datasource.EmailVerificationCodeDataSource
 import data.source.datasource.UserDataSource
-import data.source.datasource.dao.DefaultEmailVerificationDao
+import data.source.datasource.dao.DefaultEmailVerificationCodeDao
 import data.source.datasource.dao.DefaultUserDao
 import data.source.datasource.dao.EmailVerificationCodeDao
 import data.source.datasource.dao.UserDao
@@ -26,14 +28,15 @@ val handlerModule = module {
 }
 
 val repositoryModule = module {
-    single<UserRepository> { DefaultUserRepository(get(), get(qualifier = named(IO))) }
+    single<UserRepository> { DefaultUserRepository(get(), get(),  get(qualifier = named(IO))) }
 }
 
 val dataSourceModule = module {
-    single<UserDataSource> { DefaultUserDataSource(get(), get()) }
+    single<UserDataSource> { DefaultUserDataSource(get()) }
+    single<EmailVerificationCodeDataSource> { DefaultEmailVerificationCodeDataSource(get()) }
 }
 
 val daoModule = module {
     single<UserDao> { DefaultUserDao() }
-    single<EmailVerificationCodeDao> { DefaultEmailVerificationDao() }
+    single<EmailVerificationCodeDao> { DefaultEmailVerificationCodeDao() }
 }

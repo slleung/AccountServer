@@ -52,7 +52,7 @@ internal class DefaultUserDataSourceTest : KoinTest {
     fun `Insert a new user`() = runBlockingTest {
         initDb()
 
-        val result = defaultUserDataSource.insertUser(testUser1)
+        val result = defaultUserDataSource.insert(testUser1)
 
         result shouldBe instanceOf<Result.Success<Unit>>()
     }
@@ -61,7 +61,7 @@ internal class DefaultUserDataSourceTest : KoinTest {
     fun `Insert a new user already exist`() = runBlockingTest {
         initDb(testUser1)
 
-        val result = defaultUserDataSource.insertUser(testUser1)
+        val result = defaultUserDataSource.insert(testUser1)
 
         result shouldBe instanceOf<Result.Failure>()
         (result as Result.Failure).error shouldBe instanceOf<Error.AlreadyExistsError>()
@@ -71,7 +71,7 @@ internal class DefaultUserDataSourceTest : KoinTest {
     fun `Get a user by id`() = runBlockingTest {
         initDb(testUser1)
 
-        val result = defaultUserDataSource.getUser(testUser1.id)
+        val result = defaultUserDataSource.get(testUser1.id)
 
         result shouldBe instanceOf<Result.Success<User>>()
         (result as Result.Success).data shouldBe testUser1
@@ -81,7 +81,7 @@ internal class DefaultUserDataSourceTest : KoinTest {
     fun `Get a user by id does not exist`() = runBlockingTest {
         initDb()
 
-        val result = defaultUserDataSource.getUser(testUser1.id)
+        val result = defaultUserDataSource.get(testUser1.id)
 
         result shouldBe instanceOf<Result.Failure>()
         (result as Result.Failure).error shouldBe instanceOf<Error.NotFoundError>()
@@ -91,7 +91,7 @@ internal class DefaultUserDataSourceTest : KoinTest {
     fun `Get a user by email`() = runBlockingTest {
         initDb(testUser1)
 
-        val result = defaultUserDataSource.getUser(testUser1.email)
+        val result = defaultUserDataSource.get(testUser1.email)
 
         result shouldBe instanceOf<Result.Success<User>>()
         (result as Result.Success).data shouldBe testUser1
@@ -101,7 +101,7 @@ internal class DefaultUserDataSourceTest : KoinTest {
     fun `Get a user by email does not exist`() = runBlockingTest {
         initDb()
 
-        val result = defaultUserDataSource.getUser(testUser1.id)
+        val result = defaultUserDataSource.get(testUser1.id)
 
         result shouldBe instanceOf<Result.Failure>()
         (result as Result.Failure).error shouldBe instanceOf<Error.NotFoundError>()
@@ -113,7 +113,7 @@ internal class DefaultUserDataSourceTest : KoinTest {
         val newLoginDate = Date(12345)
         val changedUser = testUser1.copy(lastLoginDate = newLoginDate)
 
-        val result = defaultUserDataSource.updateUser(changedUser)
+        val result = defaultUserDataSource.update(changedUser)
 
         result shouldBe instanceOf<Result.Success<Unit>>()
     }
@@ -122,7 +122,7 @@ internal class DefaultUserDataSourceTest : KoinTest {
     fun `Update a user does not exist`() = runBlockingTest {
         initDb(testUser1)
 
-        val result = defaultUserDataSource.updateUser(testUser2)
+        val result = defaultUserDataSource.update(testUser2)
 
         result shouldBe instanceOf<Result.Failure>()
     }
